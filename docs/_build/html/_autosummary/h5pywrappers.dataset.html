@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2.3. h5pywrappers.dataset &mdash; h5pywrappers  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/readthedocs-custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.3.1. h5pywrappers.dataset.load" href="h5pywrappers.dataset.load.html" />
+    <link rel="prev" title="2.2.3. h5pywrappers.attr.ID" href="h5pywrappers.attr.ID.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> h5pywrappers
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../INSTALL.html">1. Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="h5pywrappers.html">2. Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.show_config.html">2.1. h5pywrappers.show_config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.attr.html">2.2. h5pywrappers.attr</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.3. h5pywrappers.dataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="h5pywrappers.dataset.load.html">2.3.1. h5pywrappers.dataset.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="h5pywrappers.dataset.save.html">2.3.2. h5pywrappers.dataset.save</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.file.html">2.4. h5pywrappers.file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.json.html">2.5. h5pywrappers.json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.obj.html">2.6. h5pywrappers.obj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.scalar.html">2.7. h5pywrappers.scalar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.version.html">2.8. h5pywrappers.version</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">3. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">4. To-Do list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">5. CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">6. License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">h5pywrappers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="h5pywrappers.html"><span class="section-number">2. </span>h5pywrappers</a> &raquo;</li>
+      <li><span class="section-number">2.3. </span>h5pywrappers.dataset</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-h5pywrappers.dataset">
+<span id="h5pywrappers-dataset"></span><h1><span class="section-number">2.3. </span>h5pywrappers.dataset<a class="headerlink" href="#module-h5pywrappers.dataset" title="Permalink to this heading">¶</a></h1>
+<p>For loading and saving HDF5 datasets.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="h5pywrappers.dataset.load.html#h5pywrappers.dataset.load" title="h5pywrappers.dataset.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a></p></td>
+<td><p>Load an HDF5 dataset from an HDF5 file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="h5pywrappers.dataset.save.html#h5pywrappers.dataset.save" title="h5pywrappers.dataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a></p></td>
+<td><p>Save an HDF5 dataset to an HDF5 file.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="h5pywrappers.attr.ID.html" class="btn btn-neutral float-left" title="2.2.3. h5pywrappers.attr.ID" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="h5pywrappers.dataset.load.html" class="btn btn-neutral float-right" title="2.3.1. h5pywrappers.dataset.load" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Matthew Fitzpatrick.
+      <span class="lastupdated">Last updated on Sep 05, 2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

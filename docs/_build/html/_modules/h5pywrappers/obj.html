@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>h5pywrappers.obj &mdash; h5pywrappers  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/readthedocs-custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> h5pywrappers
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALL.html">1. Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/h5pywrappers.html">2. Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">3. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">4. To-Do list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">5. CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">6. License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">h5pywrappers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+          <li><a href="../h5pywrappers.html">h5pywrappers</a> &raquo;</li>
+      <li>h5pywrappers.obj</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for h5pywrappers.obj</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;For identifying and loading HDF5 objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="c1">#####################################</span>
+<span class="c1">## Load libraries/packages/modules ##</span>
+<span class="c1">#####################################</span>
+
+<span class="c1"># For checking whether a file exists at a given path and making directories.</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+
+<span class="c1"># For removing directories.</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+
+
+<span class="c1"># For loading HDF5 files.</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="c1"># For validating and converting objects.</span>
+<span class="kn">import</span> <span class="nn">czekitout.check</span>
+<span class="kn">import</span> <span class="nn">czekitout.convert</span>
+
+<span class="c1"># For defining classes that support enforced validation, updatability,</span>
+<span class="c1"># pre-serialization, and de-serialization.</span>
+<span class="kn">import</span> <span class="nn">fancytypes</span>
+
+
+
+<span class="c1">############################</span>
+<span class="c1">## Authorship information ##</span>
+<span class="c1">############################</span>
+
+<span class="n">__author__</span>     <span class="o">=</span> <span class="s2">&quot;Matthew Fitzpatrick&quot;</span>
+<span class="n">__copyright__</span>  <span class="o">=</span> <span class="s2">&quot;Copyright 2022&quot;</span>
+<span class="n">__credits__</span>    <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Matthew Fitzpatrick&quot;</span><span class="p">]</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Matthew Fitzpatrick&quot;</span>
+<span class="n">__email__</span>      <span class="o">=</span> <span class="s2">&quot;mrfitzpa@uvic.ca&quot;</span>
+<span class="n">__status__</span>     <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+
+
+
+<span class="c1">##################################</span>
+<span class="c1">## Define classes and functions ##</span>
+<span class="c1">##################################</span>
+
+<span class="c1"># List of public objects in objects.</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;load&quot;</span><span class="p">]</span>
+
+
+
+<span class="k">def</span> <span class="nf">_check_and_convert_filename</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_str_from_path_like</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;filename&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">filename</span>
+
+
+
+<span class="k">def</span> <span class="nf">_check_and_convert_path_in_file</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
+    <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
+    <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_str_from_path_like</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span>
+                                                           <span class="s2">&quot;path_in_file&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">path_in_file</span>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_serialize_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">filename</span>
+    
+    <span class="k">return</span> <span class="n">serializable_rep</span>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_serialize_path_in_file</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">):</span>
+    <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">path_in_file</span>
+    
+    <span class="k">return</span> <span class="n">serializable_rep</span>
+
+
+
+<span class="k">def</span> <span class="nf">_de_pre_serialize_filename</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">serializable_rep</span>
+
+    <span class="k">return</span> <span class="n">filename</span>
+
+
+
+<span class="k">def</span> <span class="nf">_de_pre_serialize_path_in_file</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
+    <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">serializable_rep</span>
+
+    <span class="k">return</span> <span class="n">path_in_file</span>
+
+
+
+<div class="viewcode-block" id="ID"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.obj.ID.html#h5pywrappers.obj.ID">[docs]</a><span class="k">class</span> <span class="nc">ID</span><span class="p">(</span><span class="n">fancytypes</span><span class="o">.</span><span class="n">PreSerializableAndUpdatable</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A parameter set specifying an HDF5 object in an HDF5 file or an HDF5 </span>
+<span class="sd">    file to be.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : `str`</span>
+<span class="sd">        The relative or absolute filename of the HDF5 file that contains the</span>
+<span class="sd">        HDF5 object of interest.</span>
+<span class="sd">    path_in_file : `str`</span>
+<span class="sd">        The HDF5 path to the HDF5 object of interest contained in the HDF5 file</span>
+<span class="sd">        specified by ``filename``.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    core_attrs : `dict`, read-only</span>
+<span class="sd">        A `dict` representation of the core attributes: each `dict` key is a</span>
+<span class="sd">        `str` representing the name of a core attribute, and the corresponding</span>
+<span class="sd">        `dict` value is the object to which said core attribute is set. The core</span>
+<span class="sd">        attributes are the same as the construction parameters, except that </span>
+<span class="sd">        their values might have been updated since construction.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_validation_and_conversion_funcs</span> <span class="o">=</span> \
+        <span class="p">{</span><span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">_check_and_convert_filename</span><span class="p">,</span>
+         <span class="s2">&quot;path_in_file&quot;</span><span class="p">:</span> <span class="n">_check_and_convert_path_in_file</span><span class="p">}</span>
+
+    <span class="n">_pre_serialization_funcs</span> <span class="o">=</span> \
+        <span class="p">{</span><span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">_pre_serialize_filename</span><span class="p">,</span>
+         <span class="s2">&quot;path_in_file&quot;</span><span class="p">:</span> <span class="n">_pre_serialize_path_in_file</span><span class="p">}</span>
+
+    <span class="n">_de_pre_serialization_funcs</span> <span class="o">=</span> \
+        <span class="p">{</span><span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">_de_pre_serialize_filename</span><span class="p">,</span>
+         <span class="s2">&quot;path_in_file&quot;</span><span class="p">:</span> <span class="n">_de_pre_serialize_path_in_file</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">path_in_file</span><span class="p">):</span>
+        <span class="n">ctor_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;path_in_file&quot;</span><span class="p">:</span> <span class="n">path_in_file</span><span class="p">}</span>
+        <span class="n">fancytypes</span><span class="o">.</span><span class="n">PreSerializableAndUpdatable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctor_params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.obj.load.html#h5pywrappers.obj.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Load an HDF5 object from an HDF5 file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obj_id : :class:`h5pywrappers.obj.ID`</span>
+<span class="sd">        The parameter set specifying the HDF5 object of interest.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    obj : :class:`h5py._hl.group.Group` | :class:`h5py._hl.dataset.Dataset`</span>
+<span class="sd">        The HDF5 object of interest.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_pre_load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+    <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
+
+    <span class="n">file_obj</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">file_obj</span><span class="p">[</span><span class="n">path_in_file</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
+    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">ID</span><span class="p">,)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">obj_id</span><span class="p">,</span>
+              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;obj_id&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">err</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">err</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+        <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">path_in_file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_obj</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_4</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_save</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
+    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">ID</span><span class="p">,)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">obj_id</span><span class="p">,</span>
+              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;obj_id&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+    <span class="n">temp_dir_path</span><span class="p">,</span> <span class="n">rm_temp_dir</span> <span class="o">=</span> <span class="n">_mk_parent_dir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_save_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">err</span>
+        
+            <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_save_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_save_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">err</span>
+    <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rm_temp_dir</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir_path</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">err</span>
+
+    <span class="k">if</span> <span class="n">rm_temp_dir</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+
+<span class="k">def</span> <span class="nf">_mk_parent_dir</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">parent_dir_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">temp_dir_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">parent_dir_path</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+        <span class="n">rm_temp_dir</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">path_part</span> <span class="ow">in</span> <span class="n">parent_dir_path</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">temp_dir_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">temp_dir_path</span><span class="p">,</span> <span class="n">path_part</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">temp_dir_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">rm_temp_dir</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">parent_dir_path</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_mk_parent_dir_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">err</span>
+
+    <span class="k">return</span> <span class="n">temp_dir_path</span><span class="p">,</span> <span class="n">rm_temp_dir</span>
+
+
+
+<span class="c1">###########################</span>
+<span class="c1">## Define error messages ##</span>
+<span class="c1">###########################</span>
+
+<span class="n">_check_pre_load_err_msg_1</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;No file exists at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
+<span class="n">_check_pre_load_err_msg_2</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;Cannot access the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` because of insufficient &quot;</span>
+     <span class="s2">&quot;permissions.&quot;</span><span class="p">)</span>
+<span class="n">_check_pre_load_err_msg_3</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;No HDF5 file exists at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
+<span class="n">_check_pre_load_err_msg_4</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;No HDF5 object was found at the HDF5 path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` of the HDF5 file &quot;</span>
+     <span class="s2">&quot;at the file path``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
+
+<span class="n">_check_pre_save_err_msg_1</span> <span class="o">=</span> \
+    <span class="n">_check_pre_load_err_msg_2</span>
+<span class="n">_check_pre_save_err_msg_2</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;Cannot write to the file at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` because of &quot;</span>
+     <span class="s2">&quot;insufficient permissions.&quot;</span><span class="p">)</span>
+<span class="n">_check_pre_save_err_msg_3</span> <span class="o">=</span> \
+    <span class="n">_check_pre_load_err_msg_3</span>
+
+<span class="n">_mk_parent_dir_err_msg_1</span> <span class="o">=</span> \
+    <span class="n">_check_pre_load_err_msg_2</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Matthew Fitzpatrick.
+      <span class="lastupdated">Last updated on Sep 05, 2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

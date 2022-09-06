@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>h5pywrappers.file &mdash; h5pywrappers  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/readthedocs-custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> h5pywrappers
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALL.html">1. Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/h5pywrappers.html">2. Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">3. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">4. To-Do list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">5. CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">6. License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">h5pywrappers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+          <li><a href="../h5pywrappers.html">h5pywrappers</a> &raquo;</li>
+      <li>h5pywrappers.file</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for h5pywrappers.file</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;For generating test HDF5 files.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="c1">#####################################</span>
+<span class="c1">## Load libraries/packages/modules ##</span>
+<span class="c1">#####################################</span>
+
+<span class="c1"># For generating random numpy arrays.</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># For converting objects.</span>
+<span class="kn">import</span> <span class="nn">czekitout.convert</span>
+
+
+
+<span class="c1"># For saving HDF5 datasets, scalars, and JSON documents.</span>
+<span class="kn">import</span> <span class="nn">h5pywrappers.obj</span>
+<span class="kn">import</span> <span class="nn">h5pywrappers.dataset</span>
+<span class="kn">import</span> <span class="nn">h5pywrappers.scalar</span>
+<span class="kn">import</span> <span class="nn">h5pywrappers.json.document</span>
+
+
+
+<span class="c1">############################</span>
+<span class="c1">## Authorship information ##</span>
+<span class="c1">############################</span>
+
+<span class="n">__author__</span>     <span class="o">=</span> <span class="s2">&quot;Matthew Fitzpatrick&quot;</span>
+<span class="n">__copyright__</span>  <span class="o">=</span> <span class="s2">&quot;Copyright 2022&quot;</span>
+<span class="n">__credits__</span>    <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Matthew Fitzpatrick&quot;</span><span class="p">]</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Matthew Fitzpatrick&quot;</span>
+<span class="n">__email__</span>      <span class="o">=</span> <span class="s2">&quot;mrfitzpa@uvic.ca&quot;</span>
+<span class="n">__status__</span>     <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+
+
+
+<span class="c1">##################################</span>
+<span class="c1">## Define classes and functions ##</span>
+<span class="c1">##################################</span>
+
+<span class="c1"># List of public objects in objects.</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;generator_1&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;generator_2&quot;</span><span class="p">]</span>
+
+
+
+<div class="viewcode-block" id="generator_1"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.file.generator_1.html#h5pywrappers.file.generator_1">[docs]</a><span class="k">def</span> <span class="nf">generator_1</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;foo.h5&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Generate an HDF5 with a particular file structure and partially random </span>
+<span class="sd">    data for demonstration purposes.</span>
+
+<span class="sd">    This Python function generates an HDF5 file with the following file</span>
+<span class="sd">    structure:</span>
+
+<span class="sd">    - group-1-A: &lt;HDF5 group&gt;</span>
+<span class="sd">    </span>
+<span class="sd">      * scalar-1-A: &lt;HDF5 scalar&gt;</span>
+
+<span class="sd">        + units: &lt;HDF5 attribute&gt;</span>
+
+<span class="sd">      * dataset-1-A: &lt;HDF5 dataset&gt;        </span>
+
+<span class="sd">        + was_randomly_generated: &lt;HDF5 attribute&gt;</span>
+
+<span class="sd">    - group-1-B: &lt;HDF5 group&gt;</span>
+<span class="sd">      </span>
+<span class="sd">      * numerical_id: &lt;HDF5 attribute&gt;</span>
+
+<span class="sd">      * json-document-1-B: &lt;HDF5 JSON document&gt;</span>
+
+<span class="sd">    See the documentation for the function :class:`h5pywrappers.scalar.load` for</span>
+<span class="sd">    the definition of an HDF5 scalar adopted in the ``h5pywrappers`` library;</span>
+<span class="sd">    and see the documentation for the function</span>
+<span class="sd">    :class:`h5pywrappers.json.document.load` for the definition of a JSON</span>
+<span class="sd">    document adopted in the ``h5pywrappers`` library.</span>
+
+<span class="sd">    Given an HDF5 file object ``file_obj`` that has read access to an HDF5 with</span>
+<span class="sd">    the above file structure, one could access e.g. the HDF5 group containing</span>
+<span class="sd">    the HDF5 dataset by ``file_obj[&quot;group-1-A&quot;]``, the HDF5 dataset by</span>
+<span class="sd">    ``file_obj[&quot;group 1.A/dataset-1-A&quot;]``, or the HDF5 attribute of the HDF5</span>
+<span class="sd">    dataset by</span>
+<span class="sd">    ``file_obj[&quot;group-1-A/dataset-1-A&quot;].attrs[&quot;was_randomly_generated]``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : `str`, optional</span>
+<span class="sd">        The relative or absolute filename of the HDF5 file to be generated.</span>
+<span class="sd">    overwrite : `bool`, optional</span>
+<span class="sd">        If ``overwrite`` is set to ``False``, and a file already exists with the</span>
+<span class="sd">        filename ``filename``, then an error is raised and the pre-existing file</span>
+<span class="sd">        is left unmodified. Otherwise, the HDF5 file with the file structure</span>
+<span class="sd">        given above will be generated with the filename ``filename``, replacing</span>
+<span class="sd">        completely any pre-existing file with the same filename.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">overwrite</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_bool</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
+    
+    <span class="n">scalar</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">scalar_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                                    <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-1-A/scalar-1-A&quot;</span><span class="p">)</span>
+    <span class="n">write_mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span> <span class="k">if</span> <span class="n">overwrite</span> <span class="k">else</span> <span class="s2">&quot;w-&quot;</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">scalar</span><span class="p">,</span> <span class="n">scalar_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+    
+    <span class="n">attr</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+    <span class="n">attr_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">scalar_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+    <span class="n">write_mode</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                                     <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-1-A/dataset-1-A&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">attr</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">attr_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">dataset_id</span><span class="p">,</span>
+                                   <span class="n">attr_name</span><span class="o">=</span><span class="s2">&quot;was_randomly_generated&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">json_document</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="n">json_document_id</span> <span class="o">=</span> \
+        <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                            <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-1-B/json-document-1-B&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">json_document</span><span class="p">,</span> <span class="n">json_document_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">attr</span> <span class="o">=</span> <span class="mi">555</span>
+    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-1-B&quot;</span><span class="p">)</span>
+    <span class="n">attr_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="o">=</span><span class="s2">&quot;numerical_id&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1">###########################</span>
+<span class="c1">## Define error messages ##</span>
+<span class="c1">###########################</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Matthew Fitzpatrick.
+      <span class="lastupdated">Last updated on Sep 05, 2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
