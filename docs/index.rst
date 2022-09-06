@@ -3,8 +3,9 @@ h5pywrappers
 
 ``h5pywrappers`` is a simple Python library that contains several functions used
 to facilitate loading data from and saving data to HDF5 files. These functions
-are wrappers that call functions from the
-[``h5py``](https://docs.h5py.org/en/stable/) library.
+are wrappers that call functions from the h5py_ library
+
+.. _h5py: https://docs.h5py.org/en/stable/
 
 Setting up h5pywrappers
 -----------------------
