@@ -140,13 +140,51 @@ class ID(fancytypes.PreSerializableAndUpdatable):
 
 
 
-def load(obj_id):
+def _check_and_convert_obj_id(ctor_params):
+    obj_id = ctor_params["obj_id"]
+    
+    accepted_types = (ID,)
+    kwargs = {"obj": obj_id,
+              "obj_name": "obj_id",
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+
+    return obj_id
+
+
+
+def _pre_serialize_obj_id(obj_id):
+    serializable_rep = obj_id.pre_serialize()
+    
+    return serializable_rep
+
+
+
+def _de_pre_serialize_obj_id(serializable_rep):
+    obj_id = ID.de_pre_serialize(serializable_rep)
+
+    return obj_id
+
+
+
+def load(obj_id, read_only=True):
     r"""Load an HDF5 object from an HDF5 file.
+
+    Note that users can access the HDF5 file object to which the HDF5 object of
+    interest belongs via ``obj.file``, where ``obj`` is the HDF5 object of
+    interest. To close the HDF5 file, users can run the command
+    ``obj.file.close()``, however by doing so, any other HDF5 objects belonging
+    to that file will become unusable.
 
     Parameters
     ----------
     obj_id : :class:`h5pywrappers.obj.ID`
         The parameter set specifying the HDF5 object of interest.
+    read_only : `bool`, optional
+        If ``read_only`` is set to ``True``, then the HDF5 object of interest
+        cannot be modified after loading it. Otherwise, if ``read_only`` is set
+        to ``False``, then the HDF5 object of interest can be modified after
+        loading it.
 
     Returns
     -------
@@ -154,24 +192,29 @@ def load(obj_id):
         The HDF5 object of interest.
 
     """
-    _pre_load(obj_id)
+    read_only = _pre_load(obj_id, read_only)
 
     filename = obj_id.core_attrs["filename"]
     path_in_file = obj_id.core_attrs["path_in_file"]
 
-    file_obj = h5py.File(filename, "r")
+    if read_only:
+        file_obj = h5py.File(filename, "r")
+    else:
+        file_obj = h5py.File(filename, "a")
     obj = file_obj[path_in_file]
 
     return obj
 
 
 
-def _pre_load(obj_id):
+def _pre_load(obj_id, read_only):
     accepted_types = (ID,)
     kwargs = {"obj": obj_id,
               "obj_name": "obj_id",
               "accepted_types": accepted_types}
     czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+
+    czekitout.convert.to_bool(obj=read_only, obj_name="read_only")
 
     filename = obj_id.core_attrs["filename"]
 
@@ -187,8 +230,10 @@ def _pre_load(obj_id):
     except BaseException as err:
         raise err
 
+    file_mode = "r" if read_only else "a"
+
     try:
-        with h5py.File(filename, "r") as file_obj:
+        with h5py.File(filename, file_mode) as file_obj:
             pass
     except OSError:
         err_msg = _check_pre_load_err_msg_3.format(filename)
@@ -196,13 +241,13 @@ def _pre_load(obj_id):
     except BaseException as err:
         raise err
 
-    with h5py.File(filename, "r") as file_obj:
+    with h5py.File(filename, file_mode) as file_obj:
         path_in_file = obj_id.core_attrs["path_in_file"]
         if path_in_file not in file_obj:
             err_msg = _check_pre_load_err_msg_4.format(path_in_file, filename)
             raise ValueError(err_msg)
 
-    return None
+    return read_only
 
 
 

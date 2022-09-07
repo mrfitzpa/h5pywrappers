@@ -56,13 +56,24 @@ __all__ = ["load",
 
 
 
-def load(dataset_id):
+def load(dataset_id, read_only=True):
     r"""Load an HDF5 dataset from an HDF5 file.
+
+    Note that users can access the HDF5 file object to which the HDF5 dataset of
+    interest belongs via ``dataset.file``, where ``dataset`` is the HDF5 dataset
+    of interest. To close the HDF5 file, users can run the command
+    ``dataset.file.close()``, however by doing so, any other HDF5 objects
+    belonging to that file will become unusable.
 
     Parameters
     ----------
     dataset_id : :class:`h5pywrappers.obj.ID`
         The parameter set specifying the HDF5 dataset of interest.
+    read_only : `bool`, optional
+        If ``read_only`` is set to ``True``, then the HDF5 dataset of interest
+        cannot be modified after loading it. Otherwise, if ``read_only`` is set
+        to ``False``, then the HDF5 dataset of interest can be modified after
+        loading it.
 
     Returns
     -------
@@ -70,7 +81,7 @@ def load(dataset_id):
         The HDF5 dataset of interest.
 
     """
-    dataset = h5pywrappers.obj.load(dataset_id)
+    dataset = h5pywrappers.obj.load(dataset_id, read_only)
     accepted_types = (h5py._hl.dataset.Dataset,)
     kwargs = {"obj": dataset,
               "obj_name": "dataset",
@@ -78,7 +89,7 @@ def load(dataset_id):
     try:
         czekitout.check.if_instance_of_any_accepted_types(**kwargs)
     except BaseException as err:
-        del dataset
+        dataset.file.close()
         raise err
 
     return dataset

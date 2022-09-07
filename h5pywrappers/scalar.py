@@ -56,14 +56,14 @@ def load(scalar_id):
     dataset = h5pywrappers.dataset.load(scalar_id)
 
     if len(dataset.shape) != 0:
-        del dataset
+        dataset.file.close()
         raise TypeError(_load_err_msg_1)
     
     try:
         scalar = complex(dataset[()])
-        del dataset
+        dataset.file.close()
     except:
-        del dataset
+        dataset.file.close()
         raise TypeError(_load_err_msg_1)
 
     if scalar.imag == 0:

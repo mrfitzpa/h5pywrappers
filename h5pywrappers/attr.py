@@ -50,19 +50,6 @@ __all__ = ["ID",
 
 
 
-def _check_and_convert_obj_id(ctor_params):
-    obj_id = ctor_params["obj_id"]
-    
-    accepted_types = (h5pywrappers.obj.ID,)
-    kwargs = {"obj": obj_id,
-              "obj_name": "obj_id",
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
-
-    return obj_id
-
-
-
 def _check_and_convert_attr_name(ctor_params):
     attr_name = ctor_params["attr_name"]
     attr_name = czekitout.convert.to_str_from_path_like(attr_name, "attr_name")
@@ -71,24 +58,10 @@ def _check_and_convert_attr_name(ctor_params):
 
 
 
-def _pre_serialize_obj_id(obj_id):
-    serializable_rep = obj_id.pre_serialize()
-    
-    return serializable_rep
-
-
-
 def _pre_serialize_attr_name(attr_name):
     serializable_rep = attr_name
     
     return serializable_rep
-
-
-
-def _de_pre_serialize_obj_id(serializable_rep):
-    obj_id = h5pywrappers.obj.ID.de_pre_serialize(serializable_rep)
-
-    return obj_id
 
 
 
@@ -122,15 +95,15 @@ class ID(fancytypes.PreSerializableAndUpdatable):
 
     """
     _validation_and_conversion_funcs = \
-        {"obj_id": _check_and_convert_obj_id,
+        {"obj_id": h5pywrappers.obj._check_and_convert_obj_id,
          "attr_name": _check_and_convert_attr_name}
 
     _pre_serialization_funcs = \
-        {"obj_id": _pre_serialize_obj_id,
+        {"obj_id": h5pywrappers.obj._pre_serialize_obj_id,
          "attr_name": _pre_serialize_attr_name}
 
     _de_pre_serialization_funcs = \
-        {"obj_id": _de_pre_serialize_obj_id,
+        {"obj_id": h5pywrappers.obj._de_pre_serialize_obj_id,
          "attr_name": _de_pre_serialize_attr_name}
 
     def __init__(self, obj_id, attr_name):
@@ -167,9 +140,9 @@ def load(attr_id):
 
     try:
         attr = obj.attrs[attr_name]
-        del obj
+        obj.file.close()
     except:
-        del obj
+        obj.file.close()
         filename = obj_id.core_attrs["filename"]
         path_in_file = obj_id.core_attrs["path_in_file"]
         err_msg = _load_err_msg_1.format(path_in_file, filename, attr_name)
@@ -211,23 +184,18 @@ def save(attr, attr_id, write_mode="a-"):
 
     obj_id = attr_id.core_attrs["obj_id"]
     h5pywrappers.obj._pre_save(obj_id)
-    obj = h5pywrappers.obj.load(obj_id)
+    obj = h5pywrappers.obj.load(obj_id, read_only=False)
 
     attr_name = attr_id.core_attrs["attr_name"]
     filename = obj_id.core_attrs["filename"]
     path_in_file = obj_id.core_attrs["path_in_file"]
     if (write_mode == "a-") and (attr_name in obj.attrs):
-        del obj
+        obj.file.close()
         err_msg = _save_err_msg_2.format(attr_name, path_in_file, filename)
         raise IOError(err_msg)
 
-    try:
-        del obj
-        with h5py.File(filename, "a") as file_obj:
-            obj = file_obj[path_in_file]
-            obj.attrs[attr_name] = attr
-    except BaseException as err:
-        raise err
+    obj.attrs[attr_name] = attr
+    obj.file.close()
 
     return None
 

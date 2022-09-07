@@ -67,11 +67,11 @@ def load(json_document_id):
     try:
         dataset = h5pywrappers.dataset.load(json_document_id)
         json_document = json.loads(dataset[()])
-        del dataset
+        dataset.file.close()
         if not isinstance(json_document, dict):
             raise
     except:
-        del dataset
+        dataset.file.close()
         raise TypeError(_load_err_msg_1)
 
     return json_document
