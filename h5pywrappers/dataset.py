@@ -77,7 +77,7 @@ def load(dataset_id, read_only=True):
 
     Returns
     -------
-    dataset : :class:`h5py._hl.dataset.Dataset`
+    dataset : :class:`h5py.Dataset`
         The HDF5 dataset of interest.
 
     """
@@ -128,7 +128,7 @@ def save(dataset, dataset_id, write_mode="w-"):
 
     Parameters
     ----------
-    dataset : :class:`h5py._hl.dataset.Dataset` | `array_like` | `str`
+    dataset : :class:`h5py.Dataset` | `array_like` | `str`
         The HDF5 dataset of interest to save to an HDF5 file.
     dataset_id : :class:`h5pywrappers.obj.ID`
         The parameter set specifying where to save the HDF5 dataset of interest.

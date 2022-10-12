@@ -87,7 +87,7 @@ def save(json_document, json_document_id, write_mode="w-"):
 
     Parameters
     ----------
-    json_document : `dict` | :class:`h5py._hl.dataset.Dataset`
+    json_document : `dict` | :class:`h5py.Dataset`
         The JSON document of interest to save to an HDF5 file.
     json_document_id : :class:`h5pywrappers.obj.ID`
         The parameter set specifying where to save the JSON document of 

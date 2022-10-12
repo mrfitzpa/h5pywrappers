@@ -188,7 +188,7 @@ def load(obj_id, read_only=True):
 
     Returns
     -------
-    obj : :class:`h5py._hl.group.Group` | :class:`h5py._hl.dataset.Dataset`
+    obj : :class:`h5py.Group` | :class:`h5py.Dataset`
         The HDF5 object of interest.
 
     """

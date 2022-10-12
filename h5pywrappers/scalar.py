@@ -82,7 +82,7 @@ def save(scalar, scalar_id, write_mode="w-"):
 
     Parameters
     ----------
-    scalar : `float` | `complex` | :class:`h5py._hl.dataset.Dataset`
+    scalar : `float` | `complex` | :class:`h5py.Dataset`
         The HDF5 scalar of interest to save to an HDF5 file.
     scalar_id : :class:`h5pywrappers.obj.ID`
         The parameter set specifying where to save the HDF5 scalar of interest.
