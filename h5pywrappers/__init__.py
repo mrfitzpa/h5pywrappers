@@ -14,6 +14,7 @@ classes that inherit some subset of the aforementioned features.
 # Import child modules and packages of current package.
 import h5pywrappers.obj
 import h5pywrappers.dataset
+import h5pywrappers.datasubset
 import h5pywrappers.scalar
 import h5pywrappers.json
 import h5pywrappers.attr

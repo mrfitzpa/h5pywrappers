@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2.4.1. h5pywrappers.file.generator_1 &mdash; h5pywrappers  documentation</title>
+  <title>2.5.1. h5pywrappers.file.generator_1 &mdash; h5pywrappers  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/readthedocs-custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="2.5. h5pywrappers.json" href="h5pywrappers.json.html" />
-    <link rel="prev" title="2.4. h5pywrappers.file" href="h5pywrappers.file.html" /> 
+    <link rel="next" title="2.5.2. h5pywrappers.file.generator_2" href="h5pywrappers.file.generator_2.html" />
+    <link rel="prev" title="2.5. h5pywrappers.file" href="h5pywrappers.file.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,14 +46,16 @@
 <li class="toctree-l2"><a class="reference internal" href="h5pywrappers.show_config.html">2.1. h5pywrappers.show_config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="h5pywrappers.attr.html">2.2. h5pywrappers.attr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="h5pywrappers.dataset.html">2.3. h5pywrappers.dataset</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="h5pywrappers.file.html">2.4. h5pywrappers.file</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">2.4.1. h5pywrappers.file.generator_1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.datasubset.html">2.4. h5pywrappers.datasubset</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="h5pywrappers.file.html">2.5. h5pywrappers.file</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">2.5.1. h5pywrappers.file.generator_1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="h5pywrappers.file.generator_2.html">2.5.2. h5pywrappers.file.generator_2</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.json.html">2.5. h5pywrappers.json</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.obj.html">2.6. h5pywrappers.obj</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.scalar.html">2.7. h5pywrappers.scalar</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.version.html">2.8. h5pywrappers.version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.json.html">2.6. h5pywrappers.json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.obj.html">2.7. h5pywrappers.obj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.scalar.html">2.8. h5pywrappers.scalar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.version.html">2.9. h5pywrappers.version</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">3. Examples</a></li>
@@ -77,8 +79,8 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="h5pywrappers.html"><span class="section-number">2. </span>h5pywrappers</a> &raquo;</li>
-          <li><a href="h5pywrappers.file.html"><span class="section-number">2.4. </span>h5pywrappers.file</a> &raquo;</li>
-      <li><span class="section-number">2.4.1. </span>h5pywrappers.file.generator_1</li>
+          <li><a href="h5pywrappers.file.html"><span class="section-number">2.5. </span>h5pywrappers.file</a> &raquo;</li>
+      <li><span class="section-number">2.5.1. </span>h5pywrappers.file.generator_1</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -88,7 +90,7 @@
            <div itemprop="articleBody">
              
   <section id="h5pywrappers-file-generator-1">
-<h1><span class="section-number">2.4.1. </span>h5pywrappers.file.generator_1<a class="headerlink" href="#h5pywrappers-file-generator-1" title="Permalink to this heading">¶</a></h1>
+<h1><span class="section-number">2.5.1. </span>h5pywrappers.file.generator_1<a class="headerlink" href="#h5pywrappers-file-generator-1" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="h5pywrappers.file.generator_1">
 <span class="sig-name descname"><span class="pre">generator_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'foo.h5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/h5pywrappers/file.html#generator_1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#h5pywrappers.file.generator_1" title="Permalink to this definition">¶</a></dt>
@@ -153,15 +155,15 @@ completely any pre-existing file with the same filename.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="h5pywrappers.file.html" class="btn btn-neutral float-left" title="2.4. h5pywrappers.file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="h5pywrappers.json.html" class="btn btn-neutral float-right" title="2.5. h5pywrappers.json" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="h5pywrappers.file.html" class="btn btn-neutral float-left" title="2.5. h5pywrappers.file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="h5pywrappers.file.generator_2.html" class="btn btn-neutral float-right" title="2.5.2. h5pywrappers.file.generator_2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Sep 05, 2022.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
       </span></p>
   </div>
 

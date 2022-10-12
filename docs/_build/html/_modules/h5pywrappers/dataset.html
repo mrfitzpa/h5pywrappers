@@ -102,7 +102,7 @@
 
 
 
-<span class="c1"># For loading HDF5 objects and pre-saving HDF5 objects.</span>
+<span class="c1"># For loading and pre-saving HDF5 objects.</span>
 <span class="kn">import</span> <span class="nn">h5pywrappers.obj</span>
 
 
@@ -130,13 +130,24 @@
 
 
 
-<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.dataset.load.html#h5pywrappers.dataset.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">):</span>
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.dataset.load.html#h5pywrappers.dataset.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Load an HDF5 dataset from an HDF5 file.</span>
+
+<span class="sd">    Note that users can access the HDF5 file object to which the HDF5 dataset of</span>
+<span class="sd">    interest belongs via ``dataset.file``, where ``dataset`` is the HDF5 dataset</span>
+<span class="sd">    of interest. To close the HDF5 file, users can run the command</span>
+<span class="sd">    ``dataset.file.close()``, however by doing so, any other HDF5 objects</span>
+<span class="sd">    belonging to that file will become unusable.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dataset_id : :class:`h5pywrappers.obj.ID`</span>
 <span class="sd">        The parameter set specifying the HDF5 dataset of interest.</span>
+<span class="sd">    read_only : `bool`, optional</span>
+<span class="sd">        If ``read_only`` is set to ``True``, then the HDF5 dataset of interest</span>
+<span class="sd">        cannot be modified after loading it. Otherwise, if ``read_only`` is set</span>
+<span class="sd">        to ``False``, then the HDF5 dataset of interest can be modified after</span>
+<span class="sd">        loading it.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -144,7 +155,7 @@
 <span class="sd">        The HDF5 dataset of interest.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">)</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">read_only</span><span class="p">)</span>
     <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,)</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
               <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;dataset&quot;</span><span class="p">,</span>
@@ -152,10 +163,37 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="k">del</span> <span class="n">dataset</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">raise</span> <span class="n">err</span>
 
     <span class="k">return</span> <span class="n">dataset</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_check_and_convert_dataset_id</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span>
+    
+    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">,)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">dataset_id</span><span class="p">,</span>
+              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;dataset_id&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dataset_id</span>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_serialize_dataset_id</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">):</span>
+    <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_pre_serialize_obj_id</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">serializable_rep</span>
+
+
+
+<span class="k">def</span> <span class="nf">_de_pre_serialize_dataset_id</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_de_pre_serialize_obj_id</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dataset_id</span>
 
 
 
@@ -288,7 +326,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Sep 05, 2022.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
       </span></p>
   </div>
 

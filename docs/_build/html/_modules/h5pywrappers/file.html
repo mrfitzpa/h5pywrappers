@@ -210,6 +210,95 @@
 
 
 
+<div class="viewcode-block" id="generator_2"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.file.generator_2.html#h5pywrappers.file.generator_2">[docs]</a><span class="k">def</span> <span class="nf">generator_2</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;bar.h5&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Generate an HDF5 with a particular file structure and partially random </span>
+<span class="sd">    data for demonstration purposes.</span>
+
+<span class="sd">    This Python function generates an HDF5 file with the following file</span>
+<span class="sd">    structure:</span>
+
+<span class="sd">    - group-2-A: &lt;HDF5 group&gt;</span>
+<span class="sd">    </span>
+<span class="sd">      * scalar-2-A: &lt;HDF5 scalar&gt;</span>
+
+<span class="sd">        + units: &lt;HDF5 attribute&gt;</span>
+
+<span class="sd">      * dataset-2-A: &lt;HDF5 dataset&gt;        </span>
+
+<span class="sd">        + was_randomly_generated: &lt;HDF5 attribute&gt;</span>
+
+<span class="sd">    - group-2-B: &lt;HDF5 group&gt;</span>
+<span class="sd">      </span>
+<span class="sd">      * numerical_id: &lt;HDF5 attribute&gt;</span>
+
+<span class="sd">      * json-document-2-B: &lt;HDF5 JSON document&gt;</span>
+
+<span class="sd">    See the documentation for the function :class:`h5pywrappers.scalar.load` for</span>
+<span class="sd">    the definition of an HDF5 scalar adopted in the ``h5pywrappers`` library;</span>
+<span class="sd">    and see the documentation for the function</span>
+<span class="sd">    :class:`h5pywrappers.json.document.load` for the definition of a JSON</span>
+<span class="sd">    document adopted in the ``h5pywrappers`` library.</span>
+
+<span class="sd">    Given an HDF5 file object ``file_obj`` that has read access to an HDF5 with</span>
+<span class="sd">    the above file structure, one could access e.g. the HDF5 group containing</span>
+<span class="sd">    the HDF5 dataset by ``file_obj[&quot;group-2-A&quot;]``, the HDF5 dataset by</span>
+<span class="sd">    ``file_obj[&quot;group 1.A/dataset-2-A&quot;]``, or the HDF5 attribute of the HDF5</span>
+<span class="sd">    dataset by</span>
+<span class="sd">    ``file_obj[&quot;group-2-A/dataset-2-A&quot;].attrs[&quot;was_randomly_generated]``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : `str`, optional</span>
+<span class="sd">        The relative or absolute filename of the HDF5 file to be generated.</span>
+<span class="sd">    overwrite : `bool`, optional</span>
+<span class="sd">        If ``overwrite`` is set to ``False``, and a file already exists with the</span>
+<span class="sd">        filename ``filename``, then an error is raised and the pre-existing file</span>
+<span class="sd">        is left unmodified. Otherwise, the HDF5 file with the file structure</span>
+<span class="sd">        given above will be generated with the filename ``filename``, replacing</span>
+<span class="sd">        completely any pre-existing file with the same filename.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">overwrite</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_bool</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
+    
+    <span class="n">scalar</span> <span class="o">=</span> <span class="mf">0.5</span><span class="n">j</span>
+    <span class="n">scalar_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                                    <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-2-A/scalar-2-A&quot;</span><span class="p">)</span>
+    <span class="n">write_mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span> <span class="k">if</span> <span class="n">overwrite</span> <span class="k">else</span> <span class="s2">&quot;w-&quot;</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">scalar</span><span class="p">,</span> <span class="n">scalar_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+    
+    <span class="n">attr</span> <span class="o">=</span> <span class="s2">&quot;1/m&quot;</span>
+    <span class="n">attr_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">scalar_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+    <span class="n">write_mode</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                                     <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-2-A/dataset-2-A&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">attr</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">attr_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">dataset_id</span><span class="p">,</span>
+                                   <span class="n">attr_name</span><span class="o">=</span><span class="s2">&quot;was_randomly_generated&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">json_document</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">3</span><span class="p">}</span>
+    <span class="n">json_document_id</span> <span class="o">=</span> \
+        <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                            <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-2-B/json-document-2-B&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">json_document</span><span class="p">,</span> <span class="n">json_document_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="n">attr</span> <span class="o">=</span> <span class="mi">666</span>
+    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">path_in_file</span><span class="o">=</span><span class="s2">&quot;group-2-B&quot;</span><span class="p">)</span>
+    <span class="n">attr_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">ID</span><span class="p">(</span><span class="n">obj_id</span><span class="o">=</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="o">=</span><span class="s2">&quot;numerical_id&quot;</span><span class="p">)</span>
+    <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_id</span><span class="p">,</span> <span class="n">write_mode</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
 <span class="c1">###########################</span>
 <span class="c1">## Define error messages ##</span>
 <span class="c1">###########################</span>
@@ -223,7 +312,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Sep 05, 2022.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
       </span></p>
   </div>
 

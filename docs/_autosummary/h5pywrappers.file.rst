@@ -16,6 +16,7 @@ h5pywrappers.file
       :nosignatures:
    
       generator_1
+      generator_2
    
    
 

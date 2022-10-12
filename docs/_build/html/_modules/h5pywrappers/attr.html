@@ -124,19 +124,6 @@
 
 
 
-<span class="k">def</span> <span class="nf">_check_and_convert_obj_id</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
-    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;obj_id&quot;</span><span class="p">]</span>
-    
-    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="p">,)</span>
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">obj_id</span><span class="p">,</span>
-              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;obj_id&quot;</span><span class="p">,</span>
-              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
-    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">obj_id</span>
-
-
-
 <span class="k">def</span> <span class="nf">_check_and_convert_attr_name</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
     <span class="n">attr_name</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;attr_name&quot;</span><span class="p">]</span>
     <span class="n">attr_name</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_str_from_path_like</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="s2">&quot;attr_name&quot;</span><span class="p">)</span>
@@ -145,24 +132,10 @@
 
 
 
-<span class="k">def</span> <span class="nf">_pre_serialize_obj_id</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
-    <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">pre_serialize</span><span class="p">()</span>
-    
-    <span class="k">return</span> <span class="n">serializable_rep</span>
-
-
-
 <span class="k">def</span> <span class="nf">_pre_serialize_attr_name</span><span class="p">(</span><span class="n">attr_name</span><span class="p">):</span>
     <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">attr_name</span>
     
     <span class="k">return</span> <span class="n">serializable_rep</span>
-
-
-
-<span class="k">def</span> <span class="nf">_de_pre_serialize_obj_id</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
-    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">ID</span><span class="o">.</span><span class="n">de_pre_serialize</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">obj_id</span>
 
 
 
@@ -196,15 +169,15 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_validation_and_conversion_funcs</span> <span class="o">=</span> \
-        <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="n">_check_and_convert_obj_id</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_check_and_convert_obj_id</span><span class="p">,</span>
          <span class="s2">&quot;attr_name&quot;</span><span class="p">:</span> <span class="n">_check_and_convert_attr_name</span><span class="p">}</span>
 
     <span class="n">_pre_serialization_funcs</span> <span class="o">=</span> \
-        <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="n">_pre_serialize_obj_id</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_pre_serialize_obj_id</span><span class="p">,</span>
          <span class="s2">&quot;attr_name&quot;</span><span class="p">:</span> <span class="n">_pre_serialize_attr_name</span><span class="p">}</span>
 
     <span class="n">_de_pre_serialization_funcs</span> <span class="o">=</span> \
-        <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="n">_de_pre_serialize_obj_id</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;obj_id&quot;</span><span class="p">:</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_de_pre_serialize_obj_id</span><span class="p">,</span>
          <span class="s2">&quot;attr_name&quot;</span><span class="p">:</span> <span class="n">_de_pre_serialize_attr_name</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
@@ -236,14 +209,14 @@
     <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">obj_id</span> <span class="o">=</span> <span class="n">attr_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;obj_id&quot;</span><span class="p">]</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">attr_name</span> <span class="o">=</span> <span class="n">attr_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;attr_name&quot;</span><span class="p">]</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">attr</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span>
-        <span class="k">del</span> <span class="n">obj</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">del</span> <span class="n">obj</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
         <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
         <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_load_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
@@ -285,23 +258,18 @@
 
     <span class="n">obj_id</span> <span class="o">=</span> <span class="n">attr_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;obj_id&quot;</span><span class="p">]</span>
     <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">_pre_save</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">attr_name</span> <span class="o">=</span> <span class="n">attr_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;attr_name&quot;</span><span class="p">]</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
     <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">write_mode</span> <span class="o">==</span> <span class="s2">&quot;a-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">attr_name</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">):</span>
-        <span class="k">del</span> <span class="n">obj</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_save_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">del</span> <span class="n">obj</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
-            <span class="n">obj</span> <span class="o">=</span> <span class="n">file_obj</span><span class="p">[</span><span class="n">path_in_file</span><span class="p">]</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
-    <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">err</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="kc">None</span></div>
 
@@ -334,7 +302,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Sep 05, 2022.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
       </span></p>
   </div>
 

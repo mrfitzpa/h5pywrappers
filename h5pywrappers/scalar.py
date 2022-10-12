@@ -53,7 +53,7 @@ def load(scalar_id):
         The HDF5 scalar of interest.
 
     """
-    dataset = h5pywrappers.dataset.load(scalar_id)
+    dataset = h5pywrappers.dataset.load(scalar_id, read_only=True)
 
     if len(dataset.shape) != 0:
         dataset.file.close()

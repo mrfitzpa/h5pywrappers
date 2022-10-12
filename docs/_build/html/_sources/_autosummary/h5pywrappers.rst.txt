@@ -36,6 +36,7 @@
 
    attr
    dataset
+   datasubset
    file
    json
    obj

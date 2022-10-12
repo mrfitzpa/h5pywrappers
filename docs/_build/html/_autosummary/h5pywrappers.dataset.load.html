@@ -50,11 +50,12 @@
 <li class="toctree-l3"><a class="reference internal" href="h5pywrappers.dataset.save.html">2.3.2. h5pywrappers.dataset.save</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.file.html">2.4. h5pywrappers.file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.json.html">2.5. h5pywrappers.json</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.obj.html">2.6. h5pywrappers.obj</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.scalar.html">2.7. h5pywrappers.scalar</a></li>
-<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.version.html">2.8. h5pywrappers.version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.datasubset.html">2.4. h5pywrappers.datasubset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.file.html">2.5. h5pywrappers.file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.json.html">2.6. h5pywrappers.json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.obj.html">2.7. h5pywrappers.obj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.scalar.html">2.8. h5pywrappers.scalar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="h5pywrappers.version.html">2.9. h5pywrappers.version</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">3. Examples</a></li>
@@ -92,12 +93,22 @@
 <h1><span class="section-number">2.3.1. </span>h5pywrappers.dataset.load<a class="headerlink" href="#h5pywrappers-dataset-load" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="h5pywrappers.dataset.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/h5pywrappers/dataset.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#h5pywrappers.dataset.load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/h5pywrappers/dataset.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#h5pywrappers.dataset.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load an HDF5 dataset from an HDF5 file.</p>
+<p>Note that users can access the HDF5 file object to which the HDF5 dataset of
+interest belongs via <code class="docutils literal notranslate"><span class="pre">dataset.file</span></code>, where <code class="docutils literal notranslate"><span class="pre">dataset</span></code> is the HDF5 dataset
+of interest. To close the HDF5 file, users can run the command
+<code class="docutils literal notranslate"><span class="pre">dataset.file.close()</span></code>, however by doing so, any other HDF5 objects
+belonging to that file will become unusable.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
 <dt><strong>dataset_id</strong><span class="classifier"><a class="reference internal" href="h5pywrappers.obj.ID.html#h5pywrappers.obj.ID" title="h5pywrappers.obj.ID"><code class="xref py py-class docutils literal notranslate"><span class="pre">h5pywrappers.obj.ID</span></code></a></span></dt><dd><p>The parameter set specifying the HDF5 dataset of interest.</p>
+</dd>
+<dt><strong>read_only</strong><span class="classifier"><cite>bool</cite>, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">read_only</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the HDF5 dataset of interest
+cannot be modified after loading it. Otherwise, if <code class="docutils literal notranslate"><span class="pre">read_only</span></code> is set
+to <code class="docutils literal notranslate"><span class="pre">False</span></code>, then the HDF5 dataset of interest can be modified after
+loading it.</p>
 </dd>
 </dl>
 </dd>
@@ -124,7 +135,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Sep 05, 2022.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
       </span></p>
   </div>
 

@@ -28,7 +28,7 @@ import czekitout.convert
 
 
 
-# For loading HDF5 objects and pre-saving HDF5 objects.
+# For loading and pre-saving HDF5 objects.
 import h5pywrappers.obj
 
 
@@ -93,6 +93,33 @@ def load(dataset_id, read_only=True):
         raise err
 
     return dataset
+
+
+
+def _check_and_convert_dataset_id(ctor_params):
+    dataset_id = ctor_params["dataset_id"]
+    
+    accepted_types = (h5pywrappers.obj.ID,)
+    kwargs = {"obj": dataset_id,
+              "obj_name": "dataset_id",
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+
+    return dataset_id
+
+
+
+def _pre_serialize_dataset_id(dataset_id):
+    serializable_rep = h5pywrappers.obj._pre_serialize_obj_id(dataset_id)
+    
+    return serializable_rep
+
+
+
+def _de_pre_serialize_dataset_id(serializable_rep):
+    dataset_id = h5pywrappers.obj._de_pre_serialize_obj_id(serializable_rep)
+
+    return dataset_id
 
 
 

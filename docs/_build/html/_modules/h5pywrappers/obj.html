@@ -214,13 +214,51 @@
 
 
 
-<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.obj.load.html#h5pywrappers.obj.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_check_and_convert_obj_id</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
+    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;obj_id&quot;</span><span class="p">]</span>
+    
+    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">ID</span><span class="p">,)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">obj_id</span><span class="p">,</span>
+              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;obj_id&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">obj_id</span>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_serialize_obj_id</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
+    <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">pre_serialize</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">serializable_rep</span>
+
+
+
+<span class="k">def</span> <span class="nf">_de_pre_serialize_obj_id</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
+    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">ID</span><span class="o">.</span><span class="n">de_pre_serialize</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">obj_id</span>
+
+
+
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.obj.load.html#h5pywrappers.obj.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Load an HDF5 object from an HDF5 file.</span>
+
+<span class="sd">    Note that users can access the HDF5 file object to which the HDF5 object of</span>
+<span class="sd">    interest belongs via ``obj.file``, where ``obj`` is the HDF5 object of</span>
+<span class="sd">    interest. To close the HDF5 file, users can run the command</span>
+<span class="sd">    ``obj.file.close()``, however by doing so, any other HDF5 objects belonging</span>
+<span class="sd">    to that file will become unusable.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    obj_id : :class:`h5pywrappers.obj.ID`</span>
 <span class="sd">        The parameter set specifying the HDF5 object of interest.</span>
+<span class="sd">    read_only : `bool`, optional</span>
+<span class="sd">        If ``read_only`` is set to ``True``, then the HDF5 object of interest</span>
+<span class="sd">        cannot be modified after loading it. Otherwise, if ``read_only`` is set</span>
+<span class="sd">        to ``False``, then the HDF5 object of interest can be modified after</span>
+<span class="sd">        loading it.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -228,24 +266,29 @@
 <span class="sd">        The HDF5 object of interest.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_pre_load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+    <span class="n">read_only</span> <span class="o">=</span> <span class="n">_pre_load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">read_only</span><span class="p">)</span>
 
     <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
     <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
 
-    <span class="n">file_obj</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">read_only</span><span class="p">:</span>
+        <span class="n">file_obj</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">file_obj</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="n">file_obj</span><span class="p">[</span><span class="n">path_in_file</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">obj</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_pre_load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_pre_load</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">read_only</span><span class="p">):</span>
     <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">ID</span><span class="p">,)</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">obj_id</span><span class="p">,</span>
               <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;obj_id&quot;</span><span class="p">,</span>
               <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
     <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_bool</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="n">read_only</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;read_only&quot;</span><span class="p">)</span>
 
     <span class="n">filename</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
 
@@ -261,8 +304,10 @@
     <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">err</span>
 
+    <span class="n">file_mode</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span> <span class="k">if</span> <span class="n">read_only</span> <span class="k">else</span> <span class="s2">&quot;a&quot;</span>
+
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
             <span class="k">pass</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -270,13 +315,13 @@
     <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">err</span>
 
-    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
         <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">path_in_file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_obj</span><span class="p">:</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_4</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">read_only</span>
 
 
 
@@ -384,7 +429,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Sep 05, 2022.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
       </span></p>
   </div>
 

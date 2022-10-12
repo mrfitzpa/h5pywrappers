@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>h5pywrappers.datasubset &mdash; h5pywrappers  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/readthedocs-custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> h5pywrappers
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALL.html">1. Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/h5pywrappers.html">2. Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">3. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">4. To-Do list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">5. CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">6. License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">h5pywrappers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+          <li><a href="../h5pywrappers.html">h5pywrappers</a> &raquo;</li>
+      <li>h5pywrappers.datasubset</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for h5pywrappers.datasubset</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;For loading and saving HDF5 &quot;datasubsets&quot;.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="c1">#####################################</span>
+<span class="c1">## Load libraries/packages/modules ##</span>
+<span class="c1">#####################################</span>
+
+<span class="c1"># For general array handling.</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># For updating HDF5 datasets.</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="c1"># For validating and converting objects.</span>
+<span class="kn">import</span> <span class="nn">czekitout.check</span>
+<span class="kn">import</span> <span class="nn">czekitout.convert</span>
+
+<span class="c1"># For defining classes that support enforced validation, updatability,</span>
+<span class="c1"># pre-serialization, and de-serialization.</span>
+<span class="kn">import</span> <span class="nn">fancytypes</span>
+
+
+
+<span class="c1"># For loading and saving HDF5 datasets.</span>
+<span class="kn">import</span> <span class="nn">h5pywrappers.dataset</span>
+
+
+
+<span class="c1">############################</span>
+<span class="c1">## Authorship information ##</span>
+<span class="c1">############################</span>
+
+<span class="n">__author__</span>     <span class="o">=</span> <span class="s2">&quot;Matthew Fitzpatrick&quot;</span>
+<span class="n">__copyright__</span>  <span class="o">=</span> <span class="s2">&quot;Copyright 2022&quot;</span>
+<span class="n">__credits__</span>    <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Matthew Fitzpatrick&quot;</span><span class="p">]</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Matthew Fitzpatrick&quot;</span>
+<span class="n">__email__</span>      <span class="o">=</span> <span class="s2">&quot;mrfitzpa@uvic.ca&quot;</span>
+<span class="n">__status__</span>     <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+
+
+
+<span class="c1">##################################</span>
+<span class="c1">## Define classes and functions ##</span>
+<span class="c1">##################################</span>
+
+<span class="c1"># List of public objects in objects.</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;load&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;save&quot;</span><span class="p">]</span>
+
+
+
+<span class="k">def</span> <span class="nf">_check_and_convert_multi_dim_slice</span><span class="p">(</span><span class="n">ctor_params</span><span class="p">):</span>
+    <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="n">ctor_params</span><span class="p">[</span><span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">multi_dim_slice</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">multi_dim_slice</span><span class="p">,</span> <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">}</span>
+        <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_multi_dim_slice</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">multi_dim_slice</span>
+
+
+
+<span class="k">def</span> <span class="nf">_pre_serialize_multi_dim_slice</span><span class="p">(</span><span class="n">multi_dim_slice</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">multi_dim_slice</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">serializable_rep</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">multi_dim_slice</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">single_dim_slice</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multi_dim_slice</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">single_dim_slice</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+                <span class="n">serializable_rep</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">single_dim_slice</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                                         <span class="s2">&quot;stop&quot;</span><span class="p">:</span> <span class="n">single_dim_slice</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span>
+                                         <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="n">single_dim_slice</span><span class="o">.</span><span class="n">step</span><span class="p">}</span>
+        <span class="n">serializable_rep</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">serializable_rep</span> <span class="o">=</span> <span class="n">multi_dim_slice</span>
+    
+    <span class="k">return</span> <span class="n">serializable_rep</span>
+
+
+
+<span class="k">def</span> <span class="nf">_de_pre_serialize_multi_dim_slice</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">serializable_rep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">serializable_subitem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">serializable_rep</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">serializable_subitem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">multi_dim_slice</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">serializable_subitem</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">],</span>
+                                             <span class="n">serializable_subitem</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">],</span>
+                                             <span class="n">serializable_subitem</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">])</span>
+        <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">multi_dim_slice</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="n">serializable_rep</span>
+
+    <span class="k">return</span> <span class="n">multi_dim_slice</span>
+
+
+
+<div class="viewcode-block" id="ID"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.datasubset.ID.html#h5pywrappers.datasubset.ID">[docs]</a><span class="k">class</span> <span class="nc">ID</span><span class="p">(</span><span class="n">fancytypes</span><span class="o">.</span><span class="n">PreSerializableAndUpdatable</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A parameter set specifying an HDF5 &quot;datasubset&quot; in an HDF5 file.</span>
+
+<span class="sd">    By &quot;datasubset&quot;, we mean an array obtained by taking a multidimensional </span>
+<span class="sd">    slice of an HDF5 dataset in an HDF5 file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset_id : :class:`h5pywrappers.obj.ID`</span>
+<span class="sd">        The parameter set specifying the target HDF5 dataset containing the HDF5</span>
+<span class="sd">        datasubset of interest.</span>
+<span class="sd">    multi_dim_slice : `tuple` (`int` | `slice` | `list` (`int`)) | `None`, optional</span>
+<span class="sd">        The &quot;multidimensional slice object&quot;, which specifies the</span>
+<span class="sd">        multidimensional slice of the target HDF5 dataset that yields the HDF5</span>
+<span class="sd">        datasubset of interest. We define a multi-dimensional slice object as a</span>
+<span class="sd">        `tuple` of items which contains at most one item being a `list` of</span>
+<span class="sd">        integers, and the remaining items being `slice` and/or `int`</span>
+<span class="sd">        objects. Let ``dataset`` and ``datasubset`` be the target HDF5 dataset</span>
+<span class="sd">        and datasubset respectively. If ``multi_dim_slice`` is set to `None`,</span>
+<span class="sd">        then ``datasubset == dataset[()]``. Otherwise, if ``multi_dim_slice`` is</span>
+<span class="sd">        array-like, then ``multi_dim_slice`` satisfies ``datasubset ==</span>
+<span class="sd">        dataset[()][multi_dim_slice]``, however the actual implementation of the</span>
+<span class="sd">        multidimensional slice is more efficient than the above.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    core_attrs : `dict`, read-only</span>
+<span class="sd">        A `dict` representation of the core attributes: each `dict` key is a</span>
+<span class="sd">        `str` representing the name of a core attribute, and the corresponding</span>
+<span class="sd">        `dict` value is the object to which said core attribute is set. The core</span>
+<span class="sd">        attributes are the same as the construction parameters, except that </span>
+<span class="sd">        their values might have been updated since construction.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_validation_and_conversion_funcs</span> <span class="o">=</span> \
+        <span class="p">{</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">:</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">_check_and_convert_dataset_id</span><span class="p">,</span>
+         <span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">:</span> <span class="n">_check_and_convert_multi_dim_slice</span><span class="p">}</span>
+
+    <span class="n">_pre_serialization_funcs</span> <span class="o">=</span> \
+        <span class="p">{</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">:</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">_pre_serialize_dataset_id</span><span class="p">,</span>
+         <span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">:</span> <span class="n">_pre_serialize_multi_dim_slice</span><span class="p">}</span>
+
+    <span class="n">_de_pre_serialization_funcs</span> <span class="o">=</span> \
+        <span class="p">{</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">:</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">_de_pre_serialize_dataset_id</span><span class="p">,</span>
+         <span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">:</span> <span class="n">_de_pre_serialize_multi_dim_slice</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">multi_dim_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">ctor_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">:</span> <span class="n">dataset_id</span><span class="p">,</span>
+                       <span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">:</span> <span class="n">multi_dim_slice</span><span class="p">}</span>
+        <span class="n">fancytypes</span><span class="o">.</span><span class="n">PreSerializableAndUpdatable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctor_params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.datasubset.load.html#h5pywrappers.datasubset.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">datasubset_id</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Load an HDF5 &quot;datasubset&quot; from an HDF5 file.</span>
+
+<span class="sd">    By &quot;datasubset&quot;, we mean an array obtained by taking a multidimensional</span>
+<span class="sd">    slice of an HDF5 dataset in an HDF5 file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    datasubset_id : :class:`h5pywrappers.datasubset.ID`</span>
+<span class="sd">        The parameter set specifying the HDF5 datasubset of interest.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    datasubset : `array_like`</span>
+<span class="sd">        The HDF5 datasubset of interest.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">ID</span><span class="p">,)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">datasubset_id</span><span class="p">,</span>
+              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;datasubset_id&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">multi_dim_slice_2</span><span class="p">,</span> <span class="n">multi_dim_slice_3</span> <span class="o">=</span> \
+        <span class="n">_multi_dim_slice_triplet</span><span class="p">(</span><span class="n">datasubset_id</span><span class="p">,</span> <span class="n">datasubset</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">datasubset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span>
+    <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="n">datasubset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">]</span>
+    
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">datasubset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">multi_dim_slice_2</span><span class="p">][</span><span class="n">multi_dim_slice_3</span><span class="p">]</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">datasubset</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_multi_dim_slice_triplet</span><span class="p">(</span><span class="n">datasubset_id</span><span class="p">,</span> <span class="n">datasubset</span><span class="p">):</span>
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">datasubset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dataset_shape</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">dataset_rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset_shape</span><span class="p">)</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="n">datasubset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;multi_dim_slice&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">multi_dim_slice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">multi_dim_slice</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dataset_rank</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">multi_dim_slice</span><span class="p">)</span> <span class="o">!=</span> <span class="n">dataset_rank</span><span class="p">:</span>
+        <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">dataset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">dataset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_multi_dim_slice_triplet_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span>
+                                                            <span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="n">multi_dim_slice_1</span> <span class="o">=</span> <span class="n">multi_dim_slice</span>
+    <span class="n">multi_dim_slice_2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">multi_dim_slice_3</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">datasubset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">datasubset_shape</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dataset_rank</span><span class="p">):</span>
+        <span class="n">single_dim_slice_1</span> <span class="o">=</span> <span class="n">multi_dim_slice_1</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+        <span class="n">max_allowed_idx</span> <span class="o">=</span> <span class="n">dataset_shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">single_dim_slice_1</span><span class="p">,</span> <span class="n">single_dim_slice_2</span><span class="p">,</span> <span class="n">single_dim_slice_3</span> <span class="o">=</span> \
+            <span class="n">_check_and_convert_single_dim_slice</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="p">,</span>
+                                                <span class="n">max_allowed_idx</span><span class="p">,</span>
+                                                <span class="n">axis</span><span class="p">,</span>
+                                                <span class="n">dataset_id</span><span class="p">)</span>
+                            
+        <span class="n">multi_dim_slice_2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_dim_slice_2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">single_dim_slice_3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">multi_dim_slice_3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_dim_slice_3</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">datasubset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">datasubset_dim</span> <span class="o">=</span> \
+                    <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dataset_shape</span><span class="p">[</span><span class="n">axis</span><span class="p">])[</span><span class="n">single_dim_slice_2</span><span class="p">])</span>
+                <span class="n">datasubset_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datasubset_dim</span><span class="p">)</span>
+                
+    <span class="k">if</span> <span class="n">datasubset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">datasubset_shape</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="n">datasubset</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_check_and_convert_multi_dim_slice_err_msg_2</span><span class="p">)</span>
+
+    <span class="n">multi_dim_slice_1</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">multi_dim_slice_1</span><span class="p">)</span>
+    <span class="n">multi_dim_slice_2</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">multi_dim_slice_2</span><span class="p">)</span>
+    <span class="n">multi_dim_slice_3</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">multi_dim_slice_3</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">multi_dim_slice_1</span><span class="p">,</span> <span class="n">multi_dim_slice_2</span><span class="p">,</span> <span class="n">multi_dim_slice_3</span><span class="p">)</span>
+
+
+
+<span class="k">def</span> <span class="nf">_check_and_convert_single_dim_slice</span><span class="p">(</span><span class="n">single_dim_slice</span><span class="p">,</span>
+                                        <span class="n">max_allowed_idx</span><span class="p">,</span>
+                                        <span class="n">axis</span><span class="p">,</span>
+                                        <span class="n">dataset_id</span><span class="p">):</span>
+    <span class="n">single_dim_slice_1</span> <span class="o">=</span> <span class="n">single_dim_slice</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">single_dim_slice_1</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">_check_and_shift_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">max_allowed_idx</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">)</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)):</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_and_convert_single_dim_slice_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        
+        <span class="n">single_dim_slice_2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">temp</span><span class="p">))</span>
+        <span class="n">sort_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="n">single_dim_slice_3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)):</span>
+            <span class="n">single_dim_slice_3</span><span class="p">[</span><span class="n">sort_order</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">idx</span>
+        
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">single_dim_slice_2</span> <span class="o">=</span> \
+            <span class="n">_check_and_shift_idx</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="p">,</span>
+                                 <span class="n">max_allowed_idx</span><span class="p">,</span>
+                                 <span class="n">axis</span><span class="p">,</span>
+                                 <span class="n">dataset_id</span><span class="p">)</span>
+        <span class="n">single_dim_slice_3</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># If a `slice` object.</span>
+        <span class="n">single_dim_slice_2_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">step</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">single_dim_slice_3_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">step</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">single_dim_slice_3_step</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">single_dim_slice_2</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                                       <span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span>
+                                       <span class="n">single_dim_slice_2_step</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp_1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">max_allowed_idx</span><span class="p">)</span>
+                      <span class="k">if</span> <span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                      <span class="k">else</span> <span class="n">max_allowed_idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">temp_1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">temp_1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">max_allowed_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">temp_1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">temp_2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">max_allowed_idx</span><span class="p">)</span>
+                      <span class="k">if</span> <span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                      <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">temp_2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">single_dim_slice_1</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">temp_2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">max_allowed_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">temp_2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">temp_3</span> <span class="o">=</span> <span class="n">single_dim_slice_2_step</span>
+            <span class="n">temp_4</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp_1</span> <span class="o">-</span> <span class="n">temp_2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">temp_3</span>
+
+            <span class="n">single_dim_slice_2_start</span> <span class="o">=</span> <span class="n">temp_1</span> <span class="o">-</span> <span class="n">temp_3</span><span class="o">*</span><span class="n">temp_4</span>
+            <span class="n">single_dim_slice_2_stop</span> <span class="o">=</span> <span class="n">temp_1</span> <span class="o">+</span> <span class="mi">1</span>
+            
+            <span class="n">single_dim_slice_2</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">single_dim_slice_2_start</span><span class="p">,</span>
+                                       <span class="n">single_dim_slice_2_stop</span><span class="p">,</span>
+                                       <span class="n">single_dim_slice_2_step</span><span class="p">)</span>
+        
+        <span class="n">single_dim_slice_3</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">single_dim_slice_3_step</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">single_dim_slice_1</span><span class="p">,</span> <span class="n">single_dim_slice_2</span><span class="p">,</span> <span class="n">single_dim_slice_3</span>
+
+
+
+<span class="k">def</span> <span class="nf">_check_and_shift_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">max_allowed_idx</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">):</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_allowed_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">idx</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">idx</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">idx</span> <span class="o">&gt;</span> <span class="n">max_allowed_idx</span><span class="p">):</span>
+        <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">dataset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">dataset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_and_shift_idx_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span>
+                                                        <span class="n">path_in_file</span><span class="p">,</span>
+                                                        <span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">idx</span>
+
+
+
+<div class="viewcode-block" id="save"><a class="viewcode-back" href="../../_autosummary/h5pywrappers.datasubset.save.html#h5pywrappers.datasubset.save">[docs]</a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">datasubset</span><span class="p">,</span> <span class="n">datasubset_id</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Save an HDF5 attribute to an HDF5 file.</span>
+
+<span class="sd">    By &quot;datasubset&quot;, we mean an array obtained by taking a multidimensional</span>
+<span class="sd">    slice of an HDF5 dataset in an HDF5 file.</span>
+
+<span class="sd">    Note that if the HDF5 datasubset to be saved is of a different data type</span>
+<span class="sd">    than the aforementioned HDF5 dataset, then the current Python function will</span>
+<span class="sd">    try to convert a copy of the former to the same data type as the latter.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    datasubset : `any_type`</span>
+<span class="sd">        The HDF5 datasubset of interest to save to an HDF5 file.</span>
+<span class="sd">    datasubset_id : :class:`h5pywrappers.datasubset.ID`</span>
+<span class="sd">        The parameter set specifying where to save the HDF5 datasubset of</span>
+<span class="sd">        interest.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">ID</span><span class="p">,)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">datasubset_id</span><span class="p">,</span>
+              <span class="s2">&quot;obj_name&quot;</span><span class="p">:</span> <span class="s2">&quot;datasubset_id&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;accepted_types&quot;</span><span class="p">:</span> <span class="n">accepted_types</span><span class="p">}</span>
+    <span class="n">czekitout</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">if_instance_of_any_accepted_types</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">datasubset</span> <span class="o">=</span> <span class="n">czekitout</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">to_numpy_array</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="n">datasubset</span><span class="p">,</span>
+                                                  <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;datasubset&quot;</span><span class="p">)</span>
+    
+    <span class="n">_</span><span class="p">,</span> <span class="n">multi_dim_slice_2</span><span class="p">,</span> <span class="n">multi_dim_slice_3</span> <span class="o">=</span> \
+        <span class="n">_multi_dim_slice_triplet</span><span class="p">(</span><span class="n">datasubset_id</span><span class="p">,</span> <span class="n">datasubset</span><span class="p">)</span>
+
+    <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">datasubset_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;dataset_id&quot;</span><span class="p">]</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5pywrappers</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="p">[</span><span class="n">multi_dim_slice_2</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasubset</span><span class="p">[</span><span class="n">multi_dim_slice_3</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_save_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">_save_err_msg_1</span><span class="p">)</span>
+
+    <span class="n">dataset</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1">###########################</span>
+<span class="c1">## Define error messages ##</span>
+<span class="c1">###########################</span>
+
+<span class="n">_multi_dim_slice_triplet_err_msg_1</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;The &#39;multidimensional slice object&#39;, specified by the object &quot;</span>
+     <span class="s2">&quot;``datasubset_id``, must be a sequence of length equal to the rank of the &quot;</span>
+     <span class="s2">&quot;HDF5 dataset at the HDF5 path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` of the HDF5 file at the file path &quot;</span>
+     <span class="s2">&quot;``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
+
+<span class="n">_check_and_convert_multi_dim_slice_err_msg_2</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;The &#39;multidimensional slice object&#39;, specified by the object &quot;</span>
+     <span class="s2">&quot;``datasubset_id``, implies an HDF5 datasubset with dimensions that are &quot;</span>
+     <span class="s2">&quot;incompatible with those of the HDF5 datasubset ``datasubset``.&quot;</span><span class="p">)</span>
+
+<span class="n">_check_and_convert_single_dim_slice_err_msg_1</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;The slice for the dataset axis #</span><span class="si">{}</span><span class="s2">, specified by the object &quot;</span>
+     <span class="s2">&quot;``datasubset_id``, is of incorrect format: the slice contains repeating &quot;</span>
+     <span class="s2">&quot;indices after converting any negative indices to their functionally &quot;</span>
+     <span class="s2">&quot;equivalent positive values.&quot;</span><span class="p">)</span>
+
+<span class="n">_check_and_shift_idx_err_msg_1</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;The slice for the dataset axis #</span><span class="si">{}</span><span class="s2">, specified by the object &quot;</span>
+     <span class="s2">&quot;``datasubset_id``, is of incorrect format: the slice contains at least &quot;</span>
+     <span class="s2">&quot;one index that is out of the bounds of the HDF5 dataset at the HDF5 path &quot;</span>
+     <span class="s2">&quot;``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` of the HDF5 file at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
+
+<span class="n">_save_err_msg_1</span> <span class="o">=</span> \
+    <span class="p">(</span><span class="s2">&quot;An error occurred in trying to save the HDF5 datasubset ``datasubset`` &quot;</span>
+     <span class="s2">&quot;to the HDF5 dataset at the HDF5 path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` of the HDF5 file at the &quot;</span>
+     <span class="s2">&quot;file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``. Perhaps the HDF5 datasubet and dataset are of &quot;</span>
+     <span class="s2">&quot;imcompatible data types. See the remaining traceback for details.&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Matthew Fitzpatrick.
+      <span class="lastupdated">Last updated on Oct 11, 2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

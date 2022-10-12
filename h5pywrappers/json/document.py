@@ -65,7 +65,7 @@ def load(json_document_id):
 
     """
     try:
-        dataset = h5pywrappers.dataset.load(json_document_id)
+        dataset = h5pywrappers.dataset.load(json_document_id, read_only=True)
         json_document = json.loads(dataset[()])
         dataset.file.close()
         if not isinstance(json_document, dict):

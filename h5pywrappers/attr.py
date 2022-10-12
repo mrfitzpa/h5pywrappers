@@ -135,7 +135,7 @@ def load(attr_id):
     czekitout.check.if_instance_of_any_accepted_types(**kwargs)
 
     obj_id = attr_id.core_attrs["obj_id"]
-    obj = h5pywrappers.obj.load(obj_id)
+    obj = h5pywrappers.obj.load(obj_id, read_only=True)
     attr_name = attr_id.core_attrs["attr_name"]
 
     try:
