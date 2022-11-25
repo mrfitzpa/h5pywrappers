@@ -222,10 +222,10 @@ def _pre_load(obj_id, read_only):
         if not pathlib.Path(filename).is_file():
             raise FileNotFoundError
     except FileNotFoundError:
-        err_msg = _check_pre_load_err_msg_1.format(filename)
+        err_msg = _pre_load_err_msg_1.format(filename)
         raise FileNotFoundError(err_msg)
     except PermissionError:
-        err_msg = _check_pre_load_err_msg_2.format(filename)
+        err_msg = _pre_load_err_msg_2.format(filename)
         raise PermissionError(err_msg)
     except BaseException as err:
         raise err
@@ -236,7 +236,7 @@ def _pre_load(obj_id, read_only):
         with h5py.File(filename, file_mode) as file_obj:
             pass
     except OSError:
-        err_msg = _check_pre_load_err_msg_3.format(filename)
+        err_msg = _pre_load_err_msg_3.format(filename)
         raise OSError(err_msg)
     except BaseException as err:
         raise err
@@ -244,7 +244,7 @@ def _pre_load(obj_id, read_only):
     with h5py.File(filename, file_mode) as file_obj:
         path_in_file = obj_id.core_attrs["path_in_file"]
         if path_in_file not in file_obj:
-            err_msg = _check_pre_load_err_msg_4.format(path_in_file, filename)
+            err_msg = _pre_load_err_msg_4.format(path_in_file, filename)
             raise ValueError(err_msg)
 
     return read_only
@@ -267,7 +267,7 @@ def _pre_save(obj_id):
                 with h5py.File(filename, "w") as file_obj:
                     pass
             except PermissionError:
-                err_msg = _check_pre_save_err_msg_1.format(filename)
+                err_msg = _pre_save_err_msg_1.format(filename)
                 raise PermissionError(err_msg)
             except BaseException as err:
                 raise err
@@ -278,10 +278,10 @@ def _pre_save(obj_id):
                 with h5py.File(filename, "a") as file_obj:
                     pass
             except PermissionError:
-                err_msg = _check_pre_save_err_msg_2.format(filename)
+                err_msg = _pre_save_err_msg_2.format(filename)
                 raise PermissionError(err_msg)
             except OSError:
-                err_msg = _check_pre_save_err_msg_3.format(filename)
+                err_msg = _pre_save_err_msg_3.format(filename)
                 raise OSError(err_msg)
             except BaseException as err:
                 raise err
@@ -324,24 +324,24 @@ def _mk_parent_dir(filename):
 ## Define error messages ##
 ###########################
 
-_check_pre_load_err_msg_1 = \
+_pre_load_err_msg_1 = \
     ("No file exists at the file path ``'{}'``.")
-_check_pre_load_err_msg_2 = \
+_pre_load_err_msg_2 = \
     ("Cannot access the file path ``'{}'`` because of insufficient "
      "permissions.")
-_check_pre_load_err_msg_3 = \
+_pre_load_err_msg_3 = \
     ("No HDF5 file exists at the file path ``'{}'``.")
-_check_pre_load_err_msg_4 = \
+_pre_load_err_msg_4 = \
     ("No HDF5 object was found at the HDF5 path ``'{}'`` of the HDF5 file "
      "at the file path``'{}'``.")
 
-_check_pre_save_err_msg_1 = \
-    _check_pre_load_err_msg_2
-_check_pre_save_err_msg_2 = \
+_pre_save_err_msg_1 = \
+    _pre_load_err_msg_2
+_pre_save_err_msg_2 = \
     ("Cannot write to the file at the file path ``'{}'`` because of "
      "insufficient permissions.")
-_check_pre_save_err_msg_3 = \
-    _check_pre_load_err_msg_3
+_pre_save_err_msg_3 = \
+    _pre_load_err_msg_3
 
 _mk_parent_dir_err_msg_1 = \
-    _check_pre_load_err_msg_2
+    _pre_load_err_msg_2
