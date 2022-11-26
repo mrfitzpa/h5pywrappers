@@ -8,7 +8,8 @@ r"""For identifying and loading HDF5 objects.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For checking whether a file exists at a given path and making directories.
+# For checking whether a file exists at a given path, making directories, and
+# for removing files.
 import pathlib
 
 # For removing directories.
