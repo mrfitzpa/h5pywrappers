@@ -82,7 +82,8 @@
 <span class="c1">## Load libraries/packages/modules ##</span>
 <span class="c1">#####################################</span>
 
-<span class="c1"># For checking whether a file exists at a given path and making directories.</span>
+<span class="c1"># For checking whether a file exists at a given path, making directories, and</span>
+<span class="c1"># for removing files.</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 
 <span class="c1"># For removing directories.</span>
@@ -296,10 +297,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span>
     <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">err</span>
@@ -310,7 +311,7 @@
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
             <span class="k">pass</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">err</span>
@@ -318,7 +319,7 @@
     <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
         <span class="n">path_in_file</span> <span class="o">=</span> <span class="n">obj_id</span><span class="o">.</span><span class="n">core_attrs</span><span class="p">[</span><span class="s2">&quot;path_in_file&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">path_in_file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_obj</span><span class="p">:</span>
-            <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_load_err_msg_4</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_4</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_in_file</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">read_only</span>
@@ -341,7 +342,7 @@
                 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
                     <span class="k">pass</span>
             <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
-                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_save_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">err</span>
@@ -352,10 +353,10 @@
                 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
                     <span class="k">pass</span>
             <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
-                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_save_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_check_pre_save_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">err</span>
@@ -398,27 +399,27 @@
 <span class="c1">## Define error messages ##</span>
 <span class="c1">###########################</span>
 
-<span class="n">_check_pre_load_err_msg_1</span> <span class="o">=</span> \
+<span class="n">_pre_load_err_msg_1</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;No file exists at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
-<span class="n">_check_pre_load_err_msg_2</span> <span class="o">=</span> \
+<span class="n">_pre_load_err_msg_2</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;Cannot access the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` because of insufficient &quot;</span>
      <span class="s2">&quot;permissions.&quot;</span><span class="p">)</span>
-<span class="n">_check_pre_load_err_msg_3</span> <span class="o">=</span> \
+<span class="n">_pre_load_err_msg_3</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;No HDF5 file exists at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
-<span class="n">_check_pre_load_err_msg_4</span> <span class="o">=</span> \
+<span class="n">_pre_load_err_msg_4</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;No HDF5 object was found at the HDF5 path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` of the HDF5 file &quot;</span>
      <span class="s2">&quot;at the file path``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
 
-<span class="n">_check_pre_save_err_msg_1</span> <span class="o">=</span> \
-    <span class="n">_check_pre_load_err_msg_2</span>
-<span class="n">_check_pre_save_err_msg_2</span> <span class="o">=</span> \
+<span class="n">_pre_save_err_msg_1</span> <span class="o">=</span> \
+    <span class="n">_pre_load_err_msg_2</span>
+<span class="n">_pre_save_err_msg_2</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;Cannot write to the file at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` because of &quot;</span>
      <span class="s2">&quot;insufficient permissions.&quot;</span><span class="p">)</span>
-<span class="n">_check_pre_save_err_msg_3</span> <span class="o">=</span> \
-    <span class="n">_check_pre_load_err_msg_3</span>
+<span class="n">_pre_save_err_msg_3</span> <span class="o">=</span> \
+    <span class="n">_pre_load_err_msg_3</span>
 
 <span class="n">_mk_parent_dir_err_msg_1</span> <span class="o">=</span> \
-    <span class="n">_check_pre_load_err_msg_2</span>
+    <span class="n">_pre_load_err_msg_2</span>
 </pre></div>
 
            </div>
@@ -429,7 +430,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Oct 11, 2022.
+      <span class="lastupdated">Last updated on Nov 28, 2022.
       </span></p>
   </div>
 

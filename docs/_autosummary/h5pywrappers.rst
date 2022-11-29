@@ -38,6 +38,7 @@
    dataset
    datasubset
    file
+   group
    json
    obj
    scalar
