@@ -125,8 +125,9 @@ def save(group, group_id, write_mode="w-"):
 
     Parameters
     ----------
-    group : :class:`h5py.Group`
-        The HDF5 group of interest to save to an HDF5 file.
+    group : :class:`h5py.Group` | `None`
+        The HDF5 group of interest to save to an HDF5 file. If ``group`` is set
+        to `None`, then an empty HDF5 group is to be saved.
     group_id : :class:`h5pywrappers.obj.ID`
         The parameter set specifying where to save the HDF5 group of interest.
     write_mode : "w" | "w-" | "a" | "a-", optional
@@ -155,7 +156,10 @@ def save(group, group_id, write_mode="w-"):
 
     try:
         with h5py.File(filename, "a") as file_obj:
-            file_obj.copy(group, path_in_file)
+            if group is None:
+                file_obj.create_group(path_in_file)
+            else:
+                file_obj.copy(group, path_in_file)
     except BaseException as err:
         raise err
 
@@ -166,7 +170,7 @@ def save(group, group_id, write_mode="w-"):
 def _pre_save(group, group_id, write_mode):
     kwargs = {"obj": group,
               "obj_name": "group",
-              "accepted_types": (h5py._hl.group.Group,)}
+              "accepted_types": (h5py._hl.group.Group, type(None))}
     czekitout.check.if_instance_of_any_accepted_types(**kwargs)
 
     write_mode = czekitout.convert.to_str_from_str_like(obj=write_mode,
