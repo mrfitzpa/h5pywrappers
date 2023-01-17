@@ -17,6 +17,10 @@ h5pywrappers.datasubset.ID
       :nosignatures:
    
       ~ID.de_pre_serialize
+      ~ID.dump
+      ~ID.dumps
+      ~ID.load
+      ~ID.loads
       ~ID.pre_serialize
       ~ID.update
    

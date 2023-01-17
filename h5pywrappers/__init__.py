@@ -29,7 +29,7 @@ import h5pywrappers.version
 ############################
 
 __author__       = "Matthew Fitzpatrick"
-__copyright__    = "Copyright 2022"
+__copyright__    = "Copyright 2023"
 __credits__      = ["Matthew Fitzpatrick"]
 __version__      = h5pywrappers.version.version
 __full_version__ = h5pywrappers.version.full_version

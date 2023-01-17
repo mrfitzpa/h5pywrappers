@@ -16,42 +16,69 @@ command::
 
   pip install .
 
-Note that you must include the period as well. This will install
-``h5pywrappers`` along with all of its dependencies, namely ``numpy``, ``h5py``,
-``czekitout``, ``fancytypes``, and ``pytest``.
+Note that you must include the period as well. The above command executes a
+standard installation of ``h5pywrappers``. Upon completing the standard
+installation of ``h5pywrappers``, a set of libraries should be installed
+including ``numpy``, ``h5py``, ``pytest``, ``czekitout``, and ``fancytypes``.
+
+Optionally, for additional features in ``h5pywrappers``, one can install
+additional dependencies upon installing ``h5pywrappers``. To install a subset of
+additional dependencies, run the following command from the root of the
+repository::
+
+  pip install .[<selector>]
+
+where ``<selector>`` can be one of the following::
+
+  - ``doc``: to install the dependencies necessary for documentation generation;
+  - ``examples``: to install the dependencies necessary for running any example
+    notebooks;
+  - ``all``: to install all additional dependencies.
 
 Update h5pywrappers
 -------------------
 
 If you, or someone else has made changes to this library, you can reinstall it
-by issuing the following command::
+by issuing the following command from the root of the repository::
   
     pip install .
+
+or the command::
+
+  pip install .[<selector>]
+
+where ``<selector>`` was described in the previous section.
 
 Uninstall h5pywrappers
 ----------------------
 
-To uninstall ``h5pywrappers``, all you need to type is::
+To uninstall ``h5pywrappers``, run the following command from the root of the
+repository::
 
   pip uninstall h5pywrappers
 
 Exploring examples of using h5pywrappers
 ----------------------------------------
 
-Examples of using ``h5pywrappers`` can be found in the notebook located at
-``<root>/examples/basic-usage.ipynb``, where ``<root>`` is the root of the
-``h5pywrappers`` repository. In order to open the notebook and run cells, one
-must install ``jupyter-notebook``. One can install ``jupyter-notebook`` by
-running the following commands from the root of the repository::
+Examples of using ``h5pywrappers`` can be found in a set of notebooks in the
+directory ``<root>/examples``, where ``<root>`` is the root of the
+repository. The dependencies required for running these example notebooks can be
+installed by running the following command from the root of the repository::
 
-  pip3 install --upgrade pip
-  pip3 install -r requirements-examples.txt
+  pip install .[examples]
 
-Since the repository tracks the notebook under the original basename, we
-recommend that you copy the original notebook and rename it to whatever other
-basename before executing any cells. This way you can explore the notebook by
-executing and modifying cells without changing the original, which is being
-tracked by git.
+or the command::
+
+  pip install .[all]
+
+Note that the latter command will install all extra dependencies of
+``h5pywrappers``.
+
+Since the repository tracks the notebooks under their original basenames, we
+recommend that you copy whatever original notebook of interest and rename it to
+whatever other basename before executing any cells. This way you can explore any
+notebook by executing and modifying cells without changing the originals, which
+are being tracked by git.
 
 Generating documention files
 ----------------------------
@@ -60,7 +87,14 @@ To generate documentation in html format from source files, you will also need
 to install several other packages. This can be done by running the following
 command from the root of the repository::
 
-  pip install -r requirements-doc.txt
+  pip install .[doc]
+
+or the command::
+
+  pip install .[all]
+
+Note that the latter command will install all extra dependencies of
+``h5pywrappers``.
 
 Next, assuming that you are in the root of the repository, that you have
 installed all the prerequisite packages, and that ``h5pywrappers`` has been

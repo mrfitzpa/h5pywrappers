@@ -1,5 +1,2 @@
-numpy
-h5py
-pytest
-czekitout @ git+https://github.com/mrfitzpa/czekitout.git
 fancytypes @ git+https://github.com/mrfitzpa/fancytypes.git
+h5py
