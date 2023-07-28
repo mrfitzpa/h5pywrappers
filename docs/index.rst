@@ -13,7 +13,7 @@ Setting up h5pywrappers
 For instructions on installing the ``h5pywrappers`` library, see the
 :ref:`installation_instructions_sec` page.
 
-.. Note for those reading the raw .rst file: see file 'docs/INSTALL.rst' for
+.. Note for those reading the raw .rst file: see file "docs/INSTALL.rst" for
    instructions on installing the h5pywrappers library as well as instructions
    for compiling the documentation of this library.
 
@@ -26,7 +26,7 @@ how one can use the ``h5pywrappers`` library. While going through the examples,
 readers can consult the :ref:`reference_guide_sec` to understand what each line
 of code is doing.
 
-.. Note for those reading the raw .rst file: see directory 'examples' for the
+.. Note for those reading the raw .rst file: see directory "examples" for the
    aforementioned code examples.
    
 Contents

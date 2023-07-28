@@ -54,21 +54,21 @@ def generator_1(filename="foo.h5", overwrite=False):
     This Python function generates an HDF5 file with the following file
     structure:
 
-    - group-1-A: <HDF5 group>
+    - group_1_A: <HDF5 group>
     
-      * scalar-1-A: <HDF5 scalar>
+      * scalar_1_A: <HDF5 scalar>
 
         + units: <HDF5 attribute>
 
-      * dataset-1-A: <HDF5 dataset>        
+      * dataset_1_A: <HDF5 dataset>        
 
         + was_randomly_generated: <HDF5 attribute>
 
-    - group-1-B: <HDF5 group>
+    - group_1_B: <HDF5 group>
       
       * numerical_id: <HDF5 attribute>
 
-      * json-document-1-B: <HDF5 JSON document>
+      * json_document_1_B: <HDF5 JSON document>
 
     See the documentation for the function :class:`h5pywrappers.scalar.load` for
     the definition of an HDF5 scalar adopted in the ``h5pywrappers`` library;
@@ -78,10 +78,10 @@ def generator_1(filename="foo.h5", overwrite=False):
 
     Given an HDF5 file object ``file_obj`` that has read access to an HDF5 with
     the above file structure, one could access e.g. the HDF5 group containing
-    the HDF5 dataset by ``file_obj["group-1-A"]``, the HDF5 dataset by
-    ``file_obj["group 1.A/dataset-1-A"]``, or the HDF5 attribute of the HDF5
+    the HDF5 dataset by ``file_obj["group_1_A"]``, the HDF5 dataset by
+    ``file_obj["group_1_A/dataset_1_A"]``, or the HDF5 attribute of the HDF5
     dataset by
-    ``file_obj["group-1-A/dataset-1-A"].attrs["was_randomly_generated]``.
+    ``file_obj["group_1_A/dataset_1_A"].attrs["was_randomly_generated]``.
 
     Parameters
     ----------
@@ -102,7 +102,7 @@ def generator_1(filename="foo.h5", overwrite=False):
     
     scalar = 0.5
     scalar_id = h5pywrappers.obj.ID(filename=filename,
-                                    path_in_file="group-1-A/scalar-1-A")
+                                    path_in_file="group_1_A/scalar_1_A")
     write_mode = "w" if overwrite else "w-"
     h5pywrappers.scalar.save(scalar, scalar_id, write_mode)
     
@@ -113,7 +113,7 @@ def generator_1(filename="foo.h5", overwrite=False):
 
     dataset = np.random.rand(12, 9, 128, 150)
     dataset_id = h5pywrappers.obj.ID(filename=filename,
-                                     path_in_file="group-1-A/dataset-1-A")
+                                     path_in_file="group_1_A/dataset_1_A")
     h5pywrappers.dataset.save(dataset, dataset_id, write_mode)
 
     attr = True
@@ -124,11 +124,11 @@ def generator_1(filename="foo.h5", overwrite=False):
     json_document = {"a": 1, "b": 2, "c": 3}
     json_document_id = \
         h5pywrappers.obj.ID(filename=filename,
-                            path_in_file="group-1-B/json-document-1-B")
+                            path_in_file="group_1_B/json_document_1_B")
     h5pywrappers.json.document.save(json_document, json_document_id, write_mode)
 
     attr = 555
-    obj_id = h5pywrappers.obj.ID(filename=filename, path_in_file="group-1-B")
+    obj_id = h5pywrappers.obj.ID(filename=filename, path_in_file="group_1_B")
     attr_id = h5pywrappers.attr.ID(obj_id=obj_id, attr_name="numerical_id")
     h5pywrappers.attr.save(attr, attr_id, write_mode)
 
@@ -143,21 +143,21 @@ def generator_2(filename="bar.h5", overwrite=False):
     This Python function generates an HDF5 file with the following file
     structure:
 
-    - group-2-A: <HDF5 group>
+    - group_2_A: <HDF5 group>
     
-      * scalar-2-A: <HDF5 scalar>
+      * scalar_2_A: <HDF5 scalar>
 
         + units: <HDF5 attribute>
 
-      * dataset-2-A: <HDF5 dataset>        
+      * dataset_2_A: <HDF5 dataset>        
 
         + was_randomly_generated: <HDF5 attribute>
 
-    - group-2-B: <HDF5 group>
+    - group_2_B: <HDF5 group>
       
       * numerical_id: <HDF5 attribute>
 
-      * json-document-2-B: <HDF5 JSON document>
+      * json_document_2_B: <HDF5 JSON document>
 
     See the documentation for the function :class:`h5pywrappers.scalar.load` for
     the definition of an HDF5 scalar adopted in the ``h5pywrappers`` library;
@@ -167,10 +167,10 @@ def generator_2(filename="bar.h5", overwrite=False):
 
     Given an HDF5 file object ``file_obj`` that has read access to an HDF5 with
     the above file structure, one could access e.g. the HDF5 group containing
-    the HDF5 dataset by ``file_obj["group-2-A"]``, the HDF5 dataset by
-    ``file_obj["group 1.A/dataset-2-A"]``, or the HDF5 attribute of the HDF5
+    the HDF5 dataset by ``file_obj["group_2_A"]``, the HDF5 dataset by
+    ``file_obj["group_2_A/dataset_2_A"]``, or the HDF5 attribute of the HDF5
     dataset by
-    ``file_obj["group-2-A/dataset-2-A"].attrs["was_randomly_generated]``.
+    ``file_obj["group_2_A/dataset_2_A"].attrs["was_randomly_generated]``.
 
     Parameters
     ----------
@@ -191,7 +191,7 @@ def generator_2(filename="bar.h5", overwrite=False):
     
     scalar = 0.5j
     scalar_id = h5pywrappers.obj.ID(filename=filename,
-                                    path_in_file="group-2-A/scalar-2-A")
+                                    path_in_file="group_2_A/scalar_2_A")
     write_mode = "w" if overwrite else "w-"
     h5pywrappers.scalar.save(scalar, scalar_id, write_mode)
     
@@ -202,7 +202,7 @@ def generator_2(filename="bar.h5", overwrite=False):
 
     dataset = np.arange(10)
     dataset_id = h5pywrappers.obj.ID(filename=filename,
-                                     path_in_file="group-2-A/dataset-2-A")
+                                     path_in_file="group_2_A/dataset_2_A")
     h5pywrappers.dataset.save(dataset, dataset_id, write_mode)
 
     attr = False
@@ -213,11 +213,11 @@ def generator_2(filename="bar.h5", overwrite=False):
     json_document = {"d": -1, "e": -2, "f": -3}
     json_document_id = \
         h5pywrappers.obj.ID(filename=filename,
-                            path_in_file="group-2-B/json-document-2-B")
+                            path_in_file="group_2_B/json_document_2_B")
     h5pywrappers.json.document.save(json_document, json_document_id, write_mode)
 
     attr = 666
-    obj_id = h5pywrappers.obj.ID(filename=filename, path_in_file="group-2-B")
+    obj_id = h5pywrappers.obj.ID(filename=filename, path_in_file="group_2_B")
     attr_id = h5pywrappers.attr.ID(obj_id=obj_id, attr_name="numerical_id")
     h5pywrappers.attr.save(attr, attr_id, write_mode)
 

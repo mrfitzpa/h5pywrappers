@@ -26,7 +26,7 @@ h5pywrappers.datasubset
 
    .. autosummary::
       :toctree:
-      :template: custom-class-template.rst
+      :template: custom_class_template.rst
       :nosignatures:
    
       ID
