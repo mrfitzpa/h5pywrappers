@@ -157,7 +157,7 @@ def save(attr, attr_id, write_mode="a-"):
 
     Parameters
     ----------
-    attr_val : `any_type`
+    attr : `any_type`
         The HDF5 attribute of interest to save to an HDF5 file.
     attr_id : :class:`h5pywrappers.attr.ID`
         The parameter set specifying where to save the HDF5 attribute of 
