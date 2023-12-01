@@ -363,7 +363,7 @@
             <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
                 <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;Unable to synchronously open&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
                     <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>

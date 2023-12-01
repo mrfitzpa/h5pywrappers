@@ -284,7 +284,7 @@ def _pre_save(obj_id):
             except PermissionError:
                 err_msg = _pre_save_err_msg_2.format(filename)
                 raise PermissionError(err_msg)
-            except OSError:
+            except OSError as err:
                 if "Unable to synchronously open" not in str(err):
                     err_msg = _pre_save_err_msg_3.format(filename)
                 else:
