@@ -236,8 +236,11 @@ def _pre_load(obj_id, read_only):
     try:
         with h5py.File(filename, file_mode) as file_obj:
             pass
-    except OSError:
-        err_msg = _pre_load_err_msg_3.format(filename)
+    except OSError as err:
+        if "file is already open for read-only" not in str(err):
+            err_msg = _pre_load_err_msg_3.format(filename)
+        else:
+            err_msg = _pre_load_err_msg_4.format(filename)
         raise OSError(err_msg)
     except BaseException as err:
         raise err
@@ -245,7 +248,7 @@ def _pre_load(obj_id, read_only):
     with h5py.File(filename, file_mode) as file_obj:
         path_in_file = obj_id.core_attrs["path_in_file"]
         if path_in_file not in file_obj:
-            err_msg = _pre_load_err_msg_4.format(path_in_file, filename)
+            err_msg = _pre_load_err_msg_5.format(path_in_file, filename)
             raise ValueError(err_msg)
 
     return read_only
@@ -333,8 +336,11 @@ _pre_load_err_msg_2 = \
 _pre_load_err_msg_3 = \
     ("No HDF5 file exists at the file path ``'{}'``.")
 _pre_load_err_msg_4 = \
+    ("Unable to synchronously open the HDF5 file at the file path ``'{}'``: "
+     "the file is already open in read-only mode.")
+_pre_load_err_msg_5 = \
     ("No HDF5 object was found at the HDF5 path ``'{}'`` of the HDF5 file "
-     "at the file path``'{}'``.")
+     "at the file path ``'{}'``.")
 
 _pre_save_err_msg_1 = \
     _pre_load_err_msg_2

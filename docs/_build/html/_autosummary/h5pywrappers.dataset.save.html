@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2.3.2. h5pywrappers.dataset.save &mdash; h5pywrappers  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> h5pywrappers
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            h5pywrappers
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -46,7 +51,10 @@
 <li class="toctree-l2"><a class="reference internal" href="h5pywrappers.attr.html">2.2. h5pywrappers.attr</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="h5pywrappers.dataset.html">2.3. h5pywrappers.dataset</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="h5pywrappers.dataset.load.html">2.3.1. h5pywrappers.dataset.load</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">2.3.2. h5pywrappers.dataset.save</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">2.3.2. h5pywrappers.dataset.save</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#h5pywrappers.dataset.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="h5pywrappers.datasubset.html">2.4. h5pywrappers.datasubset</a></li>
@@ -77,10 +85,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="h5pywrappers.html"><span class="section-number">2. </span>h5pywrappers</a> &raquo;</li>
-          <li><a href="h5pywrappers.dataset.html"><span class="section-number">2.3. </span>h5pywrappers.dataset</a> &raquo;</li>
-      <li><span class="section-number">2.3.2. </span>h5pywrappers.dataset.save</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="h5pywrappers.html"><span class="section-number">2. </span>h5pywrappers</a></li>
+          <li class="breadcrumb-item"><a href="h5pywrappers.dataset.html"><span class="section-number">2.3. </span>h5pywrappers.dataset</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2.3.2. </span>h5pywrappers.dataset.save</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -89,8 +97,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="h5pywrappers-dataset-save">
-<h1><span class="section-number">2.3.2. </span>h5pywrappers.dataset.save<a class="headerlink" href="#h5pywrappers-dataset-save" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="h5pywrappers-dataset-save">
+<h1><span class="section-number">2.3.2. </span>h5pywrappers.dataset.save<a class="headerlink" href="#h5pywrappers-dataset-save" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="h5pywrappers.dataset.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w-'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/h5pywrappers/dataset.html#save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#h5pywrappers.dataset.save" title="Permalink to this definition">¶</a></dt>
@@ -102,7 +110,7 @@
 </dd>
 <dt><strong>dataset_id</strong><span class="classifier"><a class="reference internal" href="h5pywrappers.obj.ID.html#h5pywrappers.obj.ID" title="h5pywrappers.obj.ID"><code class="xref py py-class docutils literal notranslate"><span class="pre">h5pywrappers.obj.ID</span></code></a></span></dt><dd><p>The parameter set specifying where to save the HDF5 dataset of interest.</p>
 </dd>
-<dt><strong>write_mode</strong><span class="classifier">“w” | “w-” | “a” | “a-”, optional</span></dt><dd><p>The write mode upon opening the HDF5 file to which to save the HDF5
+<dt><strong>write_mode</strong><span class="classifier">“w” | “w-” | “a” | “a-“, optional</span></dt><dd><p>The write mode upon opening the HDF5 file to which to save the HDF5
 dataset of interest: if <code class="docutils literal notranslate"><span class="pre">write_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">&quot;w&quot;</span></code>, then the
 target HDF5 file is emptied prior to saving the HDF5 dataset of
 interest; else if <code class="docutils literal notranslate"><span class="pre">write_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">&quot;w-&quot;</span></code>, then the HDF5
@@ -123,7 +131,7 @@ at the target HDF5 path should one exist prior to saving.</p>
 </dl>
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>
@@ -137,7 +145,7 @@ at the target HDF5 path should one exist prior to saving.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2022, Matthew Fitzpatrick.
-      <span class="lastupdated">Last updated on Nov 29, 2023.
+      <span class="lastupdated">Last updated on Dec 01, 2023.
       </span></p>
   </div>
 
