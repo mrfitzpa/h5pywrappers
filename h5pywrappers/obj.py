@@ -237,7 +237,7 @@ def _pre_load(obj_id, read_only):
         with h5py.File(filename, file_mode) as file_obj:
             pass
     except OSError as err:
-        if "file is already open for read-only" not in str(err):
+        if "Unable to synchronously open" not in str(err):
             err_msg = _pre_load_err_msg_3.format(filename)
         else:
             err_msg = _pre_load_err_msg_4.format(filename)
@@ -285,7 +285,10 @@ def _pre_save(obj_id):
                 err_msg = _pre_save_err_msg_2.format(filename)
                 raise PermissionError(err_msg)
             except OSError:
-                err_msg = _pre_save_err_msg_3.format(filename)
+                if "Unable to synchronously open" not in str(err):
+                    err_msg = _pre_save_err_msg_3.format(filename)
+                else:
+                    err_msg = _pre_load_err_msg_4.format(filename)
                 raise OSError(err_msg)
             except BaseException as err:
                 raise err
@@ -337,7 +340,7 @@ _pre_load_err_msg_3 = \
     ("No HDF5 file exists at the file path ``'{}'``.")
 _pre_load_err_msg_4 = \
     ("Unable to synchronously open the HDF5 file at the file path ``'{}'``: "
-     "the file is already open in read-only mode.")
+     "see traceback for details.")
 _pre_load_err_msg_5 = \
     ("No HDF5 object was found at the HDF5 path ``'{}'`` of the HDF5 file "
      "at the file path ``'{}'``.")
@@ -349,6 +352,8 @@ _pre_save_err_msg_2 = \
      "insufficient permissions.")
 _pre_save_err_msg_3 = \
     _pre_load_err_msg_3
+_pre_save_err_msg_4 = \
+    _pre_load_err_msg_4
 
 _mk_parent_dir_err_msg_1 = \
     _pre_load_err_msg_2

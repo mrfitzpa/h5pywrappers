@@ -316,7 +316,7 @@
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
             <span class="k">pass</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;file is already open for read-only&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;Unable to synchronously open&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_4</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -364,7 +364,10 @@
                 <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-                <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;Unable to synchronously open&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                    <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_save_err_msg_3</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">err_msg</span> <span class="o">=</span> <span class="n">_pre_load_err_msg_4</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">err</span>
@@ -416,7 +419,7 @@
     <span class="p">(</span><span class="s2">&quot;No HDF5 file exists at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
 <span class="n">_pre_load_err_msg_4</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;Unable to synchronously open the HDF5 file at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``: &quot;</span>
-     <span class="s2">&quot;the file is already open in read-only mode.&quot;</span><span class="p">)</span>
+     <span class="s2">&quot;see traceback for details.&quot;</span><span class="p">)</span>
 <span class="n">_pre_load_err_msg_5</span> <span class="o">=</span> \
     <span class="p">(</span><span class="s2">&quot;No HDF5 object was found at the HDF5 path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;`` of the HDF5 file &quot;</span>
      <span class="s2">&quot;at the file path ``&#39;</span><span class="si">{}</span><span class="s2">&#39;``.&quot;</span><span class="p">)</span>
@@ -428,6 +431,8 @@
      <span class="s2">&quot;insufficient permissions.&quot;</span><span class="p">)</span>
 <span class="n">_pre_save_err_msg_3</span> <span class="o">=</span> \
     <span class="n">_pre_load_err_msg_3</span>
+<span class="n">_pre_save_err_msg_4</span> <span class="o">=</span> \
+    <span class="n">_pre_load_err_msg_4</span>
 
 <span class="n">_mk_parent_dir_err_msg_1</span> <span class="o">=</span> \
     <span class="n">_pre_load_err_msg_2</span>
