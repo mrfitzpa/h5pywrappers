@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+# Copyright 2024 Matthew Fitzpatrick.
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 r"""For loading and saving HDF5 datasets.
 
 """
@@ -7,6 +20,9 @@ r"""For loading and saving HDF5 datasets.
 #####################################
 ## Load libraries/packages/modules ##
 #####################################
+
+# For accessing attributes of functions.
+import inspect
 
 # For checking whether a file exists at a given path.
 import pathlib
@@ -28,21 +44,12 @@ import czekitout.convert
 
 
 
+# For defining classes that support enforced validation, updatability,
+# pre-serialization, and de-serialization.
+import h5pywrappers._fancytypes
+
 # For loading and pre-saving HDF5 objects.
 import h5pywrappers.obj
-
-
-
-############################
-## Authorship information ##
-############################
-
-__author__     = "Matthew Fitzpatrick"
-__copyright__  = "Copyright 2023"
-__credits__    = ["Matthew Fitzpatrick"]
-__maintainer__ = "Matthew Fitzpatrick"
-__email__      = "mrfitzpa@uvic.ca"
-__status__     = "Development"
 
 
 
@@ -56,7 +63,52 @@ __all__ = ["load",
 
 
 
-def load(dataset_id, read_only=True):
+def _check_and_convert_dataset_id(params):
+    obj_name = "dataset_id"
+    dataset_id = copy.deepcopy(params[obj_name])
+
+    accepted_types = (h5pywrappers.obj.ID,)
+    kwargs = {"obj": dataset_id,
+              "obj_name": obj_name,
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+
+    return dataset_id
+
+
+
+def _pre_serialize_dataset_id(dataset_id):
+    obj_id = dataset_id
+    serializable_rep = h5pywrappers.obj._pre_serialize_obj_id(obj_id)
+    
+    return serializable_rep
+
+
+
+def _de_pre_serialize_dataset_id(serializable_rep):
+    kwargs = {"serializable_rep": serializable_rep,
+              "skip_validation_and_conversion": True}
+    dataset_id = h5pywrappers.obj.ID.de_pre_serialize(**kwargs)
+
+    return dataset_id
+
+
+
+def _check_and_convert_read_only(params):
+    module_alias = h5pywrappers.obj
+    func_alias = module_alias._check_and_convert_read_only
+    read_only = func_alias(params)
+
+    return read_only
+
+
+
+_module_alias = h5pywrappers.obj
+_default_read_only = _module_alias._default_read_only
+
+
+
+def load(dataset_id, read_only=_default_read_only):
     r"""Load an HDF5 dataset from an HDF5 file.
 
     Note that users can access the HDF5 file object to which the HDF5 dataset of
@@ -81,49 +133,78 @@ def load(dataset_id, read_only=True):
         The HDF5 dataset of interest.
 
     """
-    dataset = h5pywrappers.obj.load(dataset_id, read_only)
-    accepted_types = (h5py._hl.dataset.Dataset,)
-    kwargs = {"obj": dataset,
-              "obj_name": "dataset",
-              "accepted_types": accepted_types}
-    try:
-        czekitout.check.if_instance_of_any_accepted_types(**kwargs)
-    except BaseException as err:
-        dataset.file.close()
-        raise err
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
+
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    obj = func_alias(**kwargs)
 
     return dataset
 
 
 
-def _check_and_convert_dataset_id(ctor_params):
-    dataset_id = ctor_params["dataset_id"]
+def _load(dataset_id, read_only):
+    kwargs = {"obj_id": dataset_id, "read_only": read_only}
+    dataset = h5pywrappers.obj.load(**kwargs)
     
-    accepted_types = (h5pywrappers.obj.ID,)
-    kwargs = {"obj": dataset_id,
-              "obj_name": "dataset_id",
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    accepted_types = (h5py._hl.dataset.Dataset,)
+    kwargs = {"obj": dataset,
+              "obj_name": "dataset",
+              "accepted_types": accepted_types}    
+    try:
+        czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    except:
+        dataset.file.close()
+        
+        dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+        filename = dataset_id_core_attrs["filename"]
+        path_in_file = dataset_id_core_attrs["path_in_file"]
+        
+        err_msg = _load_err_msg_1.format(path_in_file, filename)
+        raise TypeError(err_msg)
 
-    return dataset_id
+    return dataset
 
 
 
-def _pre_serialize_dataset_id(dataset_id):
-    serializable_rep = h5pywrappers.obj._pre_serialize_obj_id(dataset_id)
+def _check_and_convert_dataset(params):
+    obj_name = "dataset"
+    obj = params[obj_name]
     
-    return serializable_rep
+    if not isinstance(obj, (h5py._hl.dataset.Dataset, str)):
+        try:
+            kwargs = {"obj": obj, "obj_name": obj_name}
+            dataset = czekitout.convert.to_numpy_array(**kwargs)
+        except:
+            raise TypeError(_check_and_convert_dataset_err_msg_1)
+
+    return dataset
 
 
 
-def _de_pre_serialize_dataset_id(serializable_rep):
-    dataset_id = h5pywrappers.obj._de_pre_serialize_obj_id(serializable_rep)
+def _check_and_convert_write_mode(params):
+    obj_name = "write_mode"
 
-    return dataset_id
+    func_alias = czekitout.check.if_one_of_any_accepted_strings
+    kwargs = {"obj": params[obj_name],
+              "obj_name": obj_name,
+              "accepted_strings": ("w", "w-", "a", "a-")}
+    write_mode = func_alias(params)
+
+    return write_mode
 
 
 
-def save(dataset, dataset_id, write_mode="w-"):
+_default_write_mode = "w-"
+
+
+
+def save(dataset, dataset_id, write_mode=_default_write_mode):
     r"""Save an HDF5 dataset to an HDF5 file.
 
     Parameters
@@ -151,37 +232,45 @@ def save(dataset, dataset_id, write_mode="w-"):
     -------
 
     """
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
+
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    obj = func_alias(**kwargs)
+
+    return None
+
+
+
+def _save(dataset, dataset_id, write_mode):
     dataset, write_mode = _pre_save(dataset, dataset_id, write_mode)
 
-    filename = dataset_id.core_attrs["filename"]
-    path_in_file = dataset_id.core_attrs["path_in_file"]
+    dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+    filename = dataset_id_core_attrs["filename"]
+    path_in_file = dataset_id_core_attrs["path_in_file"]
 
-    try:
-        with h5py.File(filename, "a") as file_obj:
-            if isinstance(dataset, (np.ndarray, str)):
-                file_obj.create_dataset(path_in_file, data=dataset)
-            else:
-                file_obj.copy(dataset, path_in_file)
-    except BaseException as err:
-        raise err
+    with h5py.File(filename, "a") as file_obj:
+        if isinstance(dataset, (np.ndarray, str)):
+            file_obj.create_dataset(path_in_file, data=dataset)
+        else:
+            file_obj.copy(dataset, path_in_file)
 
     return None
 
 
 
 def _pre_save(dataset, dataset_id, write_mode):
-    dataset = _check_dataset(dataset)
-
-    write_mode = czekitout.convert.to_str_from_str_like(obj=write_mode,
-                                                        obj_name="write_mode")
-    accepted_values = ("w", "w-", "a", "a-")
-    if write_mode not in accepted_values:
-        raise ValueError(_pre_save_err_msg_1)
-
     h5pywrappers.obj._pre_save(dataset_id)
 
-    filename = dataset_id.core_attrs["filename"]
-    path_in_file = dataset_id.core_attrs["path_in_file"]
+    dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+    filename = dataset_id_core_attrs["filename"]
+    path_in_file = dataset_id_core_attrs["path_in_file"]
+    
     parent_dir_path, rm_parent_dir_if_error_occurs = \
         h5pywrappers.obj._mk_parent_dir(filename)
 
@@ -189,7 +278,7 @@ def _pre_save(dataset, dataset_id, write_mode):
         if write_mode in ("w", "w-"):
             if write_mode == "w-":
                 if pathlib.Path(filename).is_file():
-                    err_msg = _pre_save_err_msg_2.format(path_in_file, filename)
+                    err_msg = _pre_save_err_msg_1.format(path_in_file, filename)
                     raise IOError(err_msg)
             with h5py.File(filename, "w") as file_obj:
                 pass
@@ -197,7 +286,7 @@ def _pre_save(dataset, dataset_id, write_mode):
         with h5py.File(filename, "a") as file_obj:
             if path_in_file in file_obj:
                 if write_mode == "a-":
-                    err_msg = _pre_save_err_msg_3.format(path_in_file, filename)
+                    err_msg = _pre_save_err_msg_2.format(path_in_file, filename)
                     raise IOError(err_msg)
                 del file_obj[path_in_file]
                 
@@ -210,35 +299,24 @@ def _pre_save(dataset, dataset_id, write_mode):
 
 
 
-def _check_dataset(dataset):
-    if not isinstance(dataset, (h5py._hl.dataset.Dataset, str)):
-        try:
-            dataset = czekitout.convert.to_numpy_array(obj=dataset,
-                                                       obj_name="dataset")
-        except:
-            raise TypeError(_check_dataset_err_msg_1)
-
-    return dataset
-
-
-
 ###########################
 ## Define error messages ##
 ###########################
 
+_load_err_msg_1 = \
+    ("The HDF5 object at the HDF5 path ``'{}'`` of the HDF5 file at the file "
+     "path ``'{}'`` must be an HDF5 dataset.")
+
+_check_and_convert_dataset_err_msg_1 = \
+    ("The object ``dataset`` must be array-like, an HDF5 dataset, or a string.")
+
 _pre_save_err_msg_1 = \
-    ("The object ``write_mode`` must be one of the following strings: ``'w'``, "
-     "``'w-'``, ``'a'``, or ``'a-'``.")
-_pre_save_err_msg_2 = \
     ("Cannot save the dataset to the HDF5 path ``'{}'`` of the HDF5 file at "
      "the file path ``'{}'`` because an HDF5 file already exists at said file "
      "path and the parameter ``write_mode`` was set to ``'w-'``, which "
      "prohibits modifying any such pre-existing file.")
-_pre_save_err_msg_3 = \
+_pre_save_err_msg_2 = \
     ("Cannot save the dataset to the HDF5 path ``'{}'`` of the HDF5 file at "
      "the file path ``'{}'`` because an HDF5 object already exists there and "
      "the parameter ``write_mode`` was set to ``'a-'``, which prohibits "
      "replacing any such pre-existing HDF5 object.")
-
-_check_dataset_err_msg_1 = \
-    ("The object ``dataset`` must be array-like, an HDF5 dataset, or a string.")

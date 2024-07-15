@@ -1,2 +1,0 @@
-fancytypes @ git+https://github.com/mrfitzpa/fancytypes.git
-h5py
