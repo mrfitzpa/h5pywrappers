@@ -33,7 +33,8 @@ keywords = [
     "h5py"
 ]
 dependencies = [
-    "fancytypes",
+    "czekitout>=1.0.0",
+    "fancytypes>=1.0.0",
     "h5py"
 ]
 requires-python = ">=3.8"

@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+# Copyright 2024 Matthew Fitzpatrick.
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 r"""For loading and saving HDF5 object attributes.
 
 """
@@ -8,8 +21,13 @@ r"""For loading and saving HDF5 object attributes.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For saving HDF5 attributes.
-import h5py
+# For accessing attributes of functions.
+import inspect
+
+# For randomly selecting items in dictionaries.
+import random
+
+
 
 # For validating and converting objects.
 import czekitout.check
@@ -26,19 +44,6 @@ import h5pywrappers.obj
 
 
 
-############################
-## Authorship information ##
-############################
-
-__author__     = "Matthew Fitzpatrick"
-__copyright__  = "Copyright 2023"
-__credits__    = ["Matthew Fitzpatrick"]
-__maintainer__ = "Matthew Fitzpatrick"
-__email__      = "mrfitzpa@uvic.ca"
-__status__     = "Development"
-
-
-
 ##################################
 ## Define classes and functions ##
 ##################################
@@ -50,16 +55,63 @@ __all__ = ["ID",
 
 
 
-def _check_and_convert_attr_name(ctor_params):
-    attr_name = ctor_params["attr_name"]
-    attr_name = czekitout.convert.to_str_from_path_like(attr_name, "attr_name")
+def _check_and_convert_obj_id(params):
+    current_func_name = inspect.stack()[0][3]
+    
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    obj_id = func_alias(params)
+
+    return obj_id
+
+
+
+def _pre_serialize_obj_id(obj_id):
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 15
+
+    param_name = current_func_name[char_idx:]
+
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    kwargs = {param_name: obj_to_pre_serialize}
+    serializable_rep = func_alias(**kwargs)
+    
+    return serializable_rep
+
+
+
+def _de_pre_serialize_obj_id(serializable_rep):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 18
+
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    obj_id = func_alias(serializable_rep)
+
+    return obj_id
+
+
+
+def _check_and_convert_attr_name(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    kwargs = {"obj": params[obj_name], "obj_name": obj_name}
+    attr_name = czekitout.convert.to_str_from_str_like(**kwargs)
 
     return attr_name
 
 
 
 def _pre_serialize_attr_name(attr_name):
-    serializable_rep = attr_name
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+    serializable_rep = obj_to_pre_serialize
     
     return serializable_rep
 
@@ -69,6 +121,13 @@ def _de_pre_serialize_attr_name(serializable_rep):
     attr_name = serializable_rep
 
     return attr_name
+
+
+
+_module_alias = \
+    h5pywrappers.obj
+_default_skip_validation_and_conversion = \
+    _module_alias._default_skip_validation_and_conversion
 
 
 
@@ -83,34 +142,107 @@ class ID(fancytypes.PreSerializableAndUpdatable):
         HDF5 attribute of interest.
     attr_name : `str`
         The name of the HDF5 attribute of interest.
+    skip_validation_and_conversion : `bool`, optional
+        Let ``validation_and_conversion_funcs`` and ``core_attrs`` denote the
+        attributes :attr:`~fancytypes.Checkable.validation_and_conversion_funcs`
+        and :attr:`~fancytypes.Checkable.core_attrs` respectively, both of which
+        being `dict` objects.
 
-    Attributes
-    ----------
-    core_attrs : `dict`, read-only
-        A `dict` representation of the core attributes: each `dict` key is a
-        `str` representing the name of a core attribute, and the corresponding
-        `dict` value is the object to which said core attribute is set. The core
-        attributes are the same as the construction parameters, except that 
-        their values might have been updated since construction.
+        Let ``params_to_be_mapped_to_core_attrs`` denote the `dict`
+        representation of the constructor parameters excluding the parameter
+        ``skip_validation_and_conversion``, where each `dict` key ``key`` is a
+        different constructor parameter name, excluding the name
+        ``"skip_validation_and_conversion"``, and
+        ``params_to_be_mapped_to_core_attrs[key]`` would yield the value of the
+        constructor parameter with the name given by ``key``.
+
+        If ``skip_validation_and_conversion`` is set to ``False``, then for each
+        key ``key`` in ``params_to_be_mapped_to_core_attrs``,
+        ``core_attrs[key]`` is set to ``validation_and_conversion_funcs[key]
+        (params_to_be_mapped_to_core_attrs)``.
+
+        Otherwise, if ``skip_validation_and_conversion`` is set to ``True``,
+        then ``core_attrs`` is set to
+        ``params_to_be_mapped_to_core_attrs.copy()``. This option is desired
+        primarily when the user wants to avoid potentially expensive deep copies
+        and/or conversions of the `dict` values of
+        ``params_to_be_mapped_to_core_attrs``, as it is guaranteed that no
+        copies or conversions are made in this case.
 
     """
-    _validation_and_conversion_funcs = \
-        {"obj_id": h5pywrappers.obj._check_and_convert_obj_id,
-         "attr_name": _check_and_convert_attr_name}
+    ctor_param_names = ("obj_id", "attr_name")
+    kwargs = {"namespace_as_dict": globals(),
+              "ctor_param_names": ctor_param_names}
+    
+    _validation_and_conversion_funcs_ = \
+        fancytypes.return_validation_and_conversion_funcs(**kwargs)
+    _pre_serialization_funcs_ = \
+        fancytypes.return_pre_serialization_funcs(**kwargs)
+    _de_pre_serialization_funcs_ = \
+        fancytypes.return_de_pre_serialization_funcs(**kwargs)
 
-    _pre_serialization_funcs = \
-        {"obj_id": h5pywrappers.obj._pre_serialize_obj_id,
-         "attr_name": _pre_serialize_attr_name}
+    del ctor_param_names, kwargs
 
-    _de_pre_serialization_funcs = \
-        {"obj_id": h5pywrappers.obj._de_pre_serialize_obj_id,
-         "attr_name": _de_pre_serialize_attr_name}
+    
 
-    def __init__(self, obj_id, attr_name):
-        ctor_params = {"obj_id": obj_id, "attr_name": attr_name}
-        fancytypes.PreSerializableAndUpdatable.__init__(self, ctor_params)
+    def __init__(self,
+                 obj_id,
+                 attr_name,
+                 skip_validation_and_conversion=\
+                 _default_skip_validation_and_conversion):
+        ctor_params = {key: val
+                       for key, val in locals().items()
+                       if (key not in ("self", "__class__"))}
+        kwargs = ctor_params
+        kwargs["skip_cls_tests"] = True
+        fancytypes.PreSerializableAndUpdatable.__init__(self, **kwargs)
 
         return None
+
+
+
+    @classmethod
+    def get_validation_and_conversion_funcs(cls):
+        validation_and_conversion_funcs = \
+            cls._validation_and_conversion_funcs_.copy()
+
+        return validation_and_conversion_funcs
+
+
+    
+    @classmethod
+    def get_pre_serialization_funcs(cls):
+        pre_serialization_funcs = \
+            cls._pre_serialization_funcs_.copy()
+
+        return pre_serialization_funcs
+
+
+    
+    @classmethod
+    def get_de_pre_serialization_funcs(cls):
+        de_pre_serialization_funcs = \
+            cls._de_pre_serialization_funcs_.copy()
+
+        return de_pre_serialization_funcs
+
+
+
+def _check_and_convert_attr_id(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
+    
+    accepted_types = (ID,)
+
+    kwargs = {"obj": obj,
+              "obj_name": obj_name,
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    attr_id = obj
+
+    return attr_id
 
 
 
@@ -128,31 +260,82 @@ def load(attr_id):
         The HDF5 attribute of interest.
 
     """
-    accepted_types = (ID,)
-    kwargs = {"obj": attr_id,
-              "obj_name": "attr_id",
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
 
-    obj_id = attr_id.core_attrs["obj_id"]
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    attr = func_alias(**kwargs)
+
+    return attr
+
+
+
+def _load(attr_id):
+    current_func_name = inspect.stack()[0][3]
+
+    attr_id_core_attrs = attr_id.get_core_attrs(deep_copy=False)
+    obj_id = attr_id_core_attrs["obj_id"]
+    attr_name = attr_id_core_attrs["attr_name"]
+    
     obj = h5pywrappers.obj.load(obj_id, read_only=True)
-    attr_name = attr_id.core_attrs["attr_name"]
 
     try:
         attr = obj.attrs[attr_name]
         obj.file.close()
     except:
         obj.file.close()
-        filename = obj_id.core_attrs["filename"]
-        path_in_file = obj_id.core_attrs["path_in_file"]
-        err_msg = _load_err_msg_1.format(path_in_file, filename, attr_name)
+
+        obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
+        filename = obj_id_core_attrs["filename"]
+        path_in_file = obj_id_core_attrs["path_in_file"]
+        
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(path_in_file, filename, attr_name)
         raise ValueError(err_msg)
 
     return attr
 
 
 
-def save(attr, attr_id, write_mode="a-"):
+def _check_and_convert_attr(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    attr = params[obj_name]
+
+    return attr
+
+
+
+def _check_and_convert_write_mode(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
+
+    func_alias = czekitout.check.if_one_of_any_accepted_strings
+    kwargs = {"obj": obj,
+              "obj_name": obj_name,
+              "accepted_strings": ("a", "a-")}
+    func_alias(**kwargs)
+
+    kwargs = {"obj": obj, "obj_name": obj_name}
+    write_mode = czekitout.convert.to_str_from_str_like(**kwargs)
+
+    return write_mode
+
+
+
+_default_write_mode = "-a"
+
+
+
+def save(attr, attr_id, write_mode=_default_write_mode):
     r"""Save an HDF5 attribute to an HDF5 file.
 
     Parameters
@@ -178,20 +361,40 @@ def save(attr, attr_id, write_mode="a-"):
     -------
 
     """
-    accepted_values = ("a", "a-")
-    if write_mode not in accepted_values:
-        raise ValueError(_save_err_msg_1)
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
 
-    obj_id = attr_id.core_attrs["obj_id"]
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    func_alias(**kwargs)
+
+    return None
+
+
+
+def _save(attr_id, write_mode, attr):
+    current_func_name = inspect.stack()[0][3]
+
+    attr_id_core_attrs = attr_id.get_core_attrs(deep_copy=False)
+    obj_id = attr_id_core_attrs["obj_id"]
+    attr_name = attr_id_core_attrs["attr_name"]
+    
     h5pywrappers.obj._pre_save(obj_id)
     obj = h5pywrappers.obj.load(obj_id, read_only=False)
 
-    attr_name = attr_id.core_attrs["attr_name"]
-    filename = obj_id.core_attrs["filename"]
-    path_in_file = obj_id.core_attrs["path_in_file"]
     if (write_mode == "a-") and (attr_name in obj.attrs):
         obj.file.close()
-        err_msg = _save_err_msg_2.format(attr_name, path_in_file, filename)
+
+        obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
+        filename = obj_id_core_attrs["filename"]
+        path_in_file = obj_id_core_attrs["path_in_file"]
+
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(attr_name, path_in_file, filename)
         raise IOError(err_msg)
 
     obj.attrs[attr_name] = attr
@@ -210,9 +413,6 @@ _load_err_msg_1 = \
      "the file path ``'{}'`` has no HDF5 attribute named ``'{}'``.")
 
 _save_err_msg_1 = \
-    ("The object ``write_mode`` must be one of the following strings: ``'a'`` "
-     "or ``'a-'``.")
-_save_err_msg_2 = \
     ("Cannot save the HDF5 attribute named ``'{}'`` to an object at the HDF5 "
      "path ``'{}'`` of the HDF5 file at the file path ``'{}'`` because an HDF5 "
      "attribute of the same name already exists there and the parameter "

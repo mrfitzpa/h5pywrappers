@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+# Copyright 2024 Matthew Fitzpatrick.
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 r"""For loading and saving HDF5 "datasubsets".
 
 """
@@ -7,6 +20,14 @@ r"""For loading and saving HDF5 "datasubsets".
 #####################################
 ## Load libraries/packages/modules ##
 #####################################
+
+# For accessing attributes of functions.
+import inspect
+
+# For randomly selecting items in dictionaries.
+import random
+
+
 
 # For general array handling.
 import numpy as np
@@ -29,19 +50,6 @@ import h5pywrappers.dataset
 
 
 
-############################
-## Authorship information ##
-############################
-
-__author__     = "Matthew Fitzpatrick"
-__copyright__  = "Copyright 2023"
-__credits__    = ["Matthew Fitzpatrick"]
-__maintainer__ = "Matthew Fitzpatrick"
-__email__      = "mrfitzpa@uvic.ca"
-__status__     = "Development"
-
-
-
 ##################################
 ## Define classes and functions ##
 ##################################
@@ -53,11 +61,63 @@ __all__ = ["ID",
 
 
 
-def _check_and_convert_multi_dim_slice(ctor_params):
-    multi_dim_slice = ctor_params["multi_dim_slice"]
-    if multi_dim_slice is not None:
-        kwargs = {"obj": multi_dim_slice, "obj_name": "multi_dim_slice"}
-        multi_dim_slice = czekitout.convert.to_multi_dim_slice(**kwargs)
+def _check_and_convert_dataset_id(params):
+    current_func_name = inspect.stack()[0][3]
+    
+    module_alias = h5pywrappers.dataset
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    dataset_id = func_alias(params)
+
+    return dataset_id
+
+
+
+def _pre_serialize_dataset_id(dataset_id):
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 15
+    obj_name = current_func_name[char_idx:]
+    
+    module_alias = h5pywrappers.dataset
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    kwargs = {obj_name: obj_to_pre_serialize}
+    serializable_rep = func_alias(**kwargs)
+    
+    return serializable_rep
+
+
+
+def _de_pre_serialize_dataset_id(serializable_rep):
+    current_func_name = inspect.stack()[0][3]
+
+    module_alias = h5pywrappers.dataset
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    dataset_id = func_alias(serializable_rep)
+
+    return dataset_id
+
+
+
+def _check_and_convert_multi_dim_slice(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
+
+    if obj is not None:
+        try:
+            kwargs = {"obj": obj, "obj_name": obj_name}
+            multi_dim_slice = czekitout.convert.to_multi_dim_slice(**kwargs)
+        except:
+            unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+            err_msg = unformatted_err_msg.format(obj_name)
+            raise TypeError(err_msg)
+    else:
+        multi_dim_slice = None
 
     return multi_dim_slice
 
@@ -82,16 +142,25 @@ def _pre_serialize_multi_dim_slice(multi_dim_slice):
 def _de_pre_serialize_multi_dim_slice(serializable_rep):
     if serializable_rep is not None:
         multi_dim_slice = list(serializable_rep)
-        for idx, serializable_subitem in enumerate(serializable_rep):
-            if isinstance(serializable_subitem, dict):
-                multi_dim_slice[idx] = slice(serializable_subitem["start"],
-                                             serializable_subitem["stop"],
-                                             serializable_subitem["step"])
+        for idx, elem_of_serializable_rep in enumerate(serializable_rep):
+            if isinstance(elem_of_serializable_rep, dict):
+                multi_dim_slice[idx] = slice(elem_of_serializable_rep["start"],
+                                             elem_of_serializable_rep["stop"],
+                                             elem_of_serializable_rep["step"])
         multi_dim_slice = tuple(multi_dim_slice)
     else:
         multi_dim_slice = serializable_rep
 
     return multi_dim_slice
+
+
+
+_module_alias = \
+    h5pywrappers.obj
+_default_multi_dim_slice = \
+    None
+_default_skip_validation_and_conversion = \
+    _module_alias._default_skip_validation_and_conversion
 
 
 
@@ -118,35 +187,108 @@ class ID(fancytypes.PreSerializableAndUpdatable):
         array-like, then ``multi_dim_slice`` satisfies ``datasubset ==
         dataset[()][multi_dim_slice]``, however the actual implementation of the
         multidimensional slice is more efficient than the above.
+    skip_validation_and_conversion : `bool`, optional
+        Let ``validation_and_conversion_funcs`` and ``core_attrs`` denote the
+        attributes :attr:`~fancytypes.Checkable.validation_and_conversion_funcs`
+        and :attr:`~fancytypes.Checkable.core_attrs` respectively, both of which
+        being `dict` objects.
 
-    Attributes
-    ----------
-    core_attrs : `dict`, read-only
-        A `dict` representation of the core attributes: each `dict` key is a
-        `str` representing the name of a core attribute, and the corresponding
-        `dict` value is the object to which said core attribute is set. The core
-        attributes are the same as the construction parameters, except that 
-        their values might have been updated since construction.
+        Let ``params_to_be_mapped_to_core_attrs`` denote the `dict`
+        representation of the constructor parameters excluding the parameter
+        ``skip_validation_and_conversion``, where each `dict` key ``key`` is a
+        different constructor parameter name, excluding the name
+        ``"skip_validation_and_conversion"``, and
+        ``params_to_be_mapped_to_core_attrs[key]`` would yield the value of the
+        constructor parameter with the name given by ``key``.
+
+        If ``skip_validation_and_conversion`` is set to ``False``, then for each
+        key ``key`` in ``params_to_be_mapped_to_core_attrs``,
+        ``core_attrs[key]`` is set to ``validation_and_conversion_funcs[key]
+        (params_to_be_mapped_to_core_attrs)``.
+
+        Otherwise, if ``skip_validation_and_conversion`` is set to ``True``,
+        then ``core_attrs`` is set to
+        ``params_to_be_mapped_to_core_attrs.copy()``. This option is desired
+        primarily when the user wants to avoid potentially expensive deep copies
+        and/or conversions of the `dict` values of
+        ``params_to_be_mapped_to_core_attrs``, as it is guaranteed that no
+        copies or conversions are made in this case.
 
     """
-    _validation_and_conversion_funcs = \
-        {"dataset_id": h5pywrappers.dataset._check_and_convert_dataset_id,
-         "multi_dim_slice": _check_and_convert_multi_dim_slice}
+    ctor_param_names = ("dataset_id", "multi_dim_slice")
+    kwargs = {"namespace_as_dict": globals(),
+              "ctor_param_names": ctor_param_names}
+    
+    _validation_and_conversion_funcs_ = \
+        fancytypes.return_validation_and_conversion_funcs(**kwargs)
+    _pre_serialization_funcs_ = \
+        fancytypes.return_pre_serialization_funcs(**kwargs)
+    _de_pre_serialization_funcs_ = \
+        fancytypes.return_de_pre_serialization_funcs(**kwargs)
 
-    _pre_serialization_funcs = \
-        {"dataset_id": h5pywrappers.dataset._pre_serialize_dataset_id,
-         "multi_dim_slice": _pre_serialize_multi_dim_slice}
+    del ctor_param_names, kwargs
 
-    _de_pre_serialization_funcs = \
-        {"dataset_id": h5pywrappers.dataset._de_pre_serialize_dataset_id,
-         "multi_dim_slice": _de_pre_serialize_multi_dim_slice}
 
-    def __init__(self, dataset_id, multi_dim_slice=None):
-        ctor_params = {"dataset_id": dataset_id,
-                       "multi_dim_slice": multi_dim_slice}
-        fancytypes.PreSerializableAndUpdatable.__init__(self, ctor_params)
+    
+    def __init__(self,
+                 dataset_id,
+                 multi_dim_slice=\
+                 _default_multi_dim_slice,
+                 skip_validation_and_conversion=\
+                 _default_skip_validation_and_conversion):
+        ctor_params = {key: val
+                       for key, val in locals().items()
+                       if (key not in ("self", "__class__"))}
+        kwargs = ctor_params
+        kwargs["skip_cls_tests"] = True
+        fancytypes.PreSerializableAndUpdatable.__init__(self, **kwargs)
 
         return None
+
+
+
+    @classmethod
+    def get_validation_and_conversion_funcs(cls):
+        validation_and_conversion_funcs = \
+            cls._validation_and_conversion_funcs_.copy()
+
+        return validation_and_conversion_funcs
+
+
+    
+    @classmethod
+    def get_pre_serialization_funcs(cls):
+        pre_serialization_funcs = \
+            cls._pre_serialization_funcs_.copy()
+
+        return pre_serialization_funcs
+
+
+    
+    @classmethod
+    def get_de_pre_serialization_funcs(cls):
+        de_pre_serialization_funcs = \
+            cls._de_pre_serialization_funcs_.copy()
+
+        return de_pre_serialization_funcs
+
+
+
+def _check_and_convert_datasubset_id(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
+    
+    accepted_types = (ID,)
+
+    kwargs = {"obj": obj,
+              "obj_name": obj_name,
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    datasubset_id = obj
+
+    return datasubset_id
 
 
 
@@ -167,47 +309,128 @@ def load(datasubset_id):
         The HDF5 datasubset of interest.
 
     """
-    accepted_types = (ID,)
-    kwargs = {"obj": datasubset_id,
-              "obj_name": "datasubset_id",
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
 
-    _, multi_dim_slice_2, multi_dim_slice_3 = \
-        _multi_dim_slice_triplet(datasubset_id, datasubset=None)
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    datasubset = func_alias(**kwargs)
 
-    dataset_id = datasubset_id.core_attrs["dataset_id"]
-    multi_dim_slice = datasubset_id.core_attrs["multi_dim_slice"]
+    return datasubset
+
+
+
+def _load(datasubset_id):
+    current_func_name = inspect.stack()[0][3]
+
+    kwargs = {"datasubset_id": datasubset_id, "datasubset": None}
+    multi_dim_slice_triplet = _calc_multi_dim_slice_triplet(**kwargs)
+
+    multi_dim_slice_1 = multi_dim_slice_triplet[0]
+    multi_dim_slice_2 = multi_dim_slice_triplet[1]
+    multi_dim_slice_3 = multi_dim_slice_triplet[2]
+
+    datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
+    dataset_id = datasubset_id_core_attrs["dataset_id"]
+
+    kwargs = {"multi_dim_slice": multi_dim_slice_1,
+              "task_requiring_transpose": current_func_name[1:]}
+    axes_ordering_for_transpose = _calc_axes_ordering_for_transpose(**kwargs)
     
     dataset = h5pywrappers.dataset.load(dataset_id, read_only=True)
-    datasubset = dataset[multi_dim_slice_2][multi_dim_slice_3]
+
+    kwargs = {"a": dataset[multi_dim_slice_2][multi_dim_slice_3],
+              "axes": axes_ordering_for_transpose}
+    datasubset = np.transpose(**kwargs)
+    
     dataset.file.close()
 
     return datasubset
 
 
 
-def _multi_dim_slice_triplet(datasubset_id, datasubset):
-    dataset_id = datasubset_id.core_attrs["dataset_id"]
+def _calc_multi_dim_slice_triplet(datasubset_id, datasubset):
+    datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
+    dataset_id = datasubset_id_core_attrs["dataset_id"]
+    
     dataset = h5pywrappers.dataset.load(dataset_id, read_only=True)
     dataset_shape = dataset.shape
-    dataset_rank = len(dataset_shape)
     dataset.file.close()
 
-    multi_dim_slice = datasubset_id.core_attrs["multi_dim_slice"]
-    if multi_dim_slice is None:
-        multi_dim_slice = tuple(slice(None) for _ in range(dataset_rank))
+    multi_dim_slice_1 = _calc_multi_dim_slice_1(datasubset_id, dataset_shape)
 
-    if len(multi_dim_slice) != dataset_rank:
-        path_in_file = dataset_id.core_attrs["path_in_file"]
-        filename = dataset_id.core_attrs["filename"]
-        err_msg = _multi_dim_slice_triplet_err_msg_1.format(path_in_file,
-                                                            filename)
+    task_requiring_transpose = ("load"
+                                if (datasubset is None)
+                                else "save")
+
+    kwargs = {"multi_dim_slice": multi_dim_slice_1,
+              "task_requiring_transpose": task_requiring_transpose}
+    axes_ordering_for_transpose = _calc_axes_ordering_for_transpose(**kwargs)
+
+    kwargs = {"datasubset_id": datasubset_id,
+              "datasubset": datasubset,
+              "dataset_shape": dataset_shape,
+              "multi_dim_slice_1": multi_dim_slice_1,
+              "axes_ordering_for_transpose": axes_ordering_for_transpose}
+    multi_dim_slices_2_and_3 = _calc_multi_dim_slices_2_and_3(**kwargs)
+    
+    multi_dim_slice_2 = multi_dim_slices_2_and_3[0]
+    multi_dim_slice_3 = multi_dim_slices_2_and_3[1]
+
+    multi_dim_slice_triplet = (multi_dim_slice_1,
+                               multi_dim_slice_2,
+                               multi_dim_slice_3)
+
+    return multi_dim_slice_triplet
+
+
+
+def _calc_multi_dim_slice_1(datasubset_id, dataset_shape):
+    current_func_name = inspect.stack()[0][3]
+
+    datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
+    
+    dataset_rank = len(dataset_shape)
+
+    multi_dim_slice_1 = datasubset_id_core_attrs["multi_dim_slice"]
+    if multi_dim_slice_1 is None:
+        multi_dim_slice_1 = tuple(slice(None) for _ in range(dataset_rank))
+
+    if len(multi_dim_slice_1) != dataset_rank:
+        dataset_id = datasubset_id_core_attrs["dataset_id"]
+        
+        dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+        path_in_file = dataset_id_core_attrs["path_in_file"]
+        filename = dataset_id_core_attrs["filename"]
+        
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(path_in_file, filename)
         raise IndexError(err_msg)
 
-    multi_dim_slice_1 = multi_dim_slice
-    multi_dim_slice_2 = []
-    multi_dim_slice_3 = []
+    multi_dim_slice_1 = tuple(multi_dim_slice_1)
+
+    return multi_dim_slice_1
+
+
+
+def _calc_multi_dim_slices_2_and_3(datasubset_id,
+                                   datasubset,
+                                   dataset_shape,
+                                   multi_dim_slice_1,
+                                   axes_ordering_for_transpose):
+    current_func_name = inspect.stack()[0][3]
+
+    datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
+    dataset_id = datasubset_id_core_attrs["dataset_id"]
+    
+    dataset_rank = len(dataset_shape)
+
+    multi_dim_slice_2 = tuple()
+    multi_dim_slice_3 = tuple()
 
     if datasubset is not None:
         datasubset_shape = []
@@ -216,110 +439,222 @@ def _multi_dim_slice_triplet(datasubset_id, datasubset):
         single_dim_slice_1 = multi_dim_slice_1[axis]
         max_allowed_idx = dataset_shape[axis]-1
 
-        single_dim_slice_1, single_dim_slice_2, single_dim_slice_3 = \
-            _check_and_convert_single_dim_slice(single_dim_slice_1,
-                                                max_allowed_idx,
-                                                axis,
-                                                dataset_id)
+        kwargs = {"single_dim_slice_1": single_dim_slice_1,
+                  "max_allowed_idx": max_allowed_idx,
+                  "axis": axis,
+                  "dataset_id": dataset_id}
+        single_dim_slice_triplet = _calc_single_dim_slice_triplet(**kwargs)
+        
+        single_dim_slice_2 = single_dim_slice_triplet[1]
+        single_dim_slice_3 = single_dim_slice_triplet[2]
                             
-        multi_dim_slice_2.append(single_dim_slice_2)
+        multi_dim_slice_2 += (single_dim_slice_2,)
         if single_dim_slice_3 is not None:
-            multi_dim_slice_3.append(single_dim_slice_3)
+            multi_dim_slice_3 += (single_dim_slice_3,)
             if datasubset is not None:
-                datasubset_dim = \
-                    len(np.arange(dataset_shape[axis])[single_dim_slice_2])
+                dataset_dim = dataset_shape[axis]
+                datasubset_dim = len(np.arange(dataset_dim)[single_dim_slice_2])
                 datasubset_shape.append(datasubset_dim)
                 
     if datasubset is not None:
-        if datasubset_shape != list(datasubset.shape):
-            raise ValueError(_check_and_convert_multi_dim_slice_err_msg_2)
+        datasubset_shape = tuple(datasubset_shape[axis_idx]
+                                 for axis_idx
+                                 in axes_ordering_for_transpose)
+        if datasubset_shape != datasubset.shape:
+            err_msg = globals()[current_func_name+"_err_msg_1"]
+            raise ValueError(err_msg)
 
-    multi_dim_slice_1 = tuple(multi_dim_slice_1)
-    multi_dim_slice_2 = tuple(multi_dim_slice_2)
-    multi_dim_slice_3 = tuple(multi_dim_slice_3)
+    multi_dim_slices_2_and_3 = (multi_dim_slice_2, multi_dim_slice_3)
 
-    return (multi_dim_slice_1, multi_dim_slice_2, multi_dim_slice_3)
+    return multi_dim_slices_2_and_3
 
 
 
-def _check_and_convert_single_dim_slice(single_dim_slice,
-                                        max_allowed_idx,
-                                        axis,
-                                        dataset_id):
-    single_dim_slice_1 = single_dim_slice
+def _calc_single_dim_slice_triplet(single_dim_slice_1,
+                                   max_allowed_idx,
+                                   axis,
+                                   dataset_id):
+    kwargs = locals()
 
     if isinstance(single_dim_slice_1, list):
-        temp = []
-        for idx in single_dim_slice_1:
-            idx = _check_and_shift_idx(idx, max_allowed_idx, axis, dataset_id)
-            temp.append(idx)
-            
-        if len(temp) != len(set(temp)):
-            err_msg = _check_and_convert_single_dim_slice_err_msg_1.format(axis)
-            raise ValueError(err_msg)
-        
-        single_dim_slice_2 = list(np.sort(temp))
-        sort_order = np.argsort(temp)
-        single_dim_slice_3 = [0]*len(temp)
-        for idx in range(len(temp)):
-            single_dim_slice_3[sort_order[idx]] = idx
-        
+        func_alias = _calc_single_dim_slice_triplet_for_case_1
     elif isinstance(single_dim_slice_1, int):
-        single_dim_slice_2 = \
-            _check_and_shift_idx(single_dim_slice_1,
-                                 max_allowed_idx,
-                                 axis,
-                                 dataset_id)
-        single_dim_slice_3 = None
-
+        func_alias = _calc_single_dim_slice_triplet_for_case_2
     else:  # If a `slice` object.
-        single_dim_slice_2_step = np.abs(single_dim_slice_1.step or 1)
-        single_dim_slice_3_step = np.sign(single_dim_slice_1.step or 1)
-        if single_dim_slice_3_step > 0:
-            single_dim_slice_2 = slice(single_dim_slice_1.start,
-                                       single_dim_slice_1.stop,
-                                       single_dim_slice_2_step)
-        else:
-            temp_1 = (min(single_dim_slice_1.start, max_allowed_idx)
-                      if single_dim_slice_1.start is not None
-                      else max_allowed_idx)
-            if temp_1 < 0:
-                temp_1 = max((max_allowed_idx+1)+temp_1, 0)
+        func_alias = _calc_single_dim_slice_triplet_for_case_3
+        del kwargs["axis"]
+        del kwargs["dataset_id"]
 
-            temp_2 = (min(single_dim_slice_1.stop, max_allowed_idx)
-                      if single_dim_slice_1.stop is not None
-                      else -1)
-            if (temp_2 < 0) and (single_dim_slice_1.stop is not None):
-                temp_2 = max((max_allowed_idx+1)+temp_2, -1)
+    single_dim_slice_triplet = func_alias(**kwargs)
 
-            temp_3 = single_dim_slice_2_step
-            temp_4 = (temp_1 - temp_2 - 1) // temp_3
+    return single_dim_slice_triplet
 
-            single_dim_slice_2_start = temp_1 - temp_3*temp_4
-            single_dim_slice_2_stop = temp_1 + 1
+
+
+def _calc_single_dim_slice_triplet_for_case_1(single_dim_slice_1,
+                                              max_allowed_idx,
+                                              axis,
+                                              dataset_id):
+    current_func_name = inspect.stack()[0][3]
+
+    temp = []
+    for idx in single_dim_slice_1:
+        idx = _check_and_shift_idx(idx, max_allowed_idx, axis, dataset_id)
+        temp.append(idx)
             
-            single_dim_slice_2 = slice(single_dim_slice_2_start,
-                                       single_dim_slice_2_stop,
-                                       single_dim_slice_2_step)
+    if len(temp) != len(set(temp)):
+        dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+        path_in_file = dataset_id_core_attrs["path_in_file"]
+        filename = dataset_id_core_attrs["filename"]
         
-        single_dim_slice_3 = slice(None, None, single_dim_slice_3_step)
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(axis, path_in_file, filename)
+        raise ValueError(err_msg)
+        
+    single_dim_slice_2 = list(np.sort(temp))
+    sort_order = np.argsort(temp)
+    single_dim_slice_3 = [0]*len(temp)
+    for idx in range(len(temp)):
+        single_dim_slice_3[sort_order[idx]] = idx
 
-    return single_dim_slice_1, single_dim_slice_2, single_dim_slice_3
+    single_dim_slice_triplet = (single_dim_slice_1,
+                                single_dim_slice_2,
+                                single_dim_slice_3)
+
+    return single_dim_slice_triplet
+
+
+
+def _calc_single_dim_slice_triplet_for_case_2(single_dim_slice_1,
+                                              max_allowed_idx,
+                                              axis,
+                                              dataset_id):
+    kwargs = {"idx": single_dim_slice_1,
+              "max_allowed_idx": max_allowed_idx,
+              "axis": axis,
+              "dataset_id": dataset_id}
+    single_dim_slice_2 = _check_and_shift_idx(**kwargs)
+    
+    single_dim_slice_3 = None
+
+    single_dim_slice_triplet = (single_dim_slice_1,
+                                single_dim_slice_2,
+                                single_dim_slice_3)
+
+    return single_dim_slice_triplet
 
 
 
 def _check_and_shift_idx(idx, max_allowed_idx, axis, dataset_id):
-    idx = (max_allowed_idx+1)+idx if idx < 0 else idx
+    current_func_name = inspect.stack()[0][3]
+
+    idx = (max_allowed_idx+1)+idx if (idx < 0) else idx
 
     if (idx < 0) or (idx > max_allowed_idx):
-        path_in_file = dataset_id.core_attrs["path_in_file"]
-        filename = dataset_id.core_attrs["filename"]
-        err_msg = _check_and_shift_idx_err_msg_1.format(axis,
-                                                        path_in_file,
-                                                        filename)
+        dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+        path_in_file = dataset_id_core_attrs["path_in_file"]
+        filename = dataset_id_core_attrs["filename"]
+
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(axis, path_in_file, filename)
         raise ValueError(err_msg)
 
     return idx
+
+
+
+def _calc_single_dim_slice_triplet_for_case_3(single_dim_slice_1,
+                                              max_allowed_idx):
+    single_dim_slice_2_step = int(np.abs(single_dim_slice_1.step or 1))
+    single_dim_slice_3_step = int(np.sign(single_dim_slice_1.step or 1))
+    
+    if single_dim_slice_3_step > 0:
+        single_dim_slice_2 = slice(single_dim_slice_1.start,
+                                   single_dim_slice_1.stop,
+                                   single_dim_slice_2_step)
+    else:
+        temp_1 = (min(single_dim_slice_1.start, max_allowed_idx)
+                  if (single_dim_slice_1.start is not None)
+                  else max_allowed_idx)
+        if temp_1 < 0:
+            temp_1 = max((max_allowed_idx+1)+temp_1, 0)
+
+        temp_2 = (min(single_dim_slice_1.stop, max_allowed_idx)
+                  if (single_dim_slice_1.stop is not None)
+                  else -1)
+        if (temp_2 < 0) and (single_dim_slice_1.stop is not None):
+            temp_2 = max((max_allowed_idx+1)+temp_2, -1)
+
+        temp_3 = single_dim_slice_2_step
+        temp_4 = (temp_1 - temp_2 - 1) // temp_3
+
+        single_dim_slice_2_start = temp_1 - temp_3*temp_4
+        single_dim_slice_2_stop = temp_1 + 1
+            
+        single_dim_slice_2 = slice(single_dim_slice_2_start,
+                                   single_dim_slice_2_stop,
+                                   single_dim_slice_2_step)
+        
+    single_dim_slice_3 = slice(None, None, single_dim_slice_3_step)
+
+    single_dim_slice_triplet = (single_dim_slice_1,
+                                single_dim_slice_2,
+                                single_dim_slice_3)
+
+    return single_dim_slice_triplet
+
+
+
+def _calc_axes_ordering_for_transpose(multi_dim_slice,
+                                      task_requiring_transpose):
+    pop_idx = 0
+    insert_idx = 0
+    non_scalar_single_dim_slice_count = 0
+    num_advanced_array_idx_clusters = 0
+    last_single_dim_slice_was_a_slice = None
+    axes_ordering_for_transpose = []
+
+    for axis_idx, single_dim_slice in enumerate(multi_dim_slice):
+        if isinstance(single_dim_slice, (int, list)):
+            if last_single_dim_slice_was_a_slice is None:
+                num_advanced_array_idx_clusters += 1
+            elif last_single_dim_slice_was_a_slice:
+                num_advanced_array_idx_clusters += 1
+
+            last_single_dim_slice_was_a_slice = False
+            
+            if isinstance(single_dim_slice, list):
+                if task_requiring_transpose == "load":
+                    pop_idx = non_scalar_single_dim_slice_count
+                    insert_idx = 0
+                else:
+                    pop_idx = 0
+                    insert_idx = non_scalar_single_dim_slice_count
+        else:
+            last_single_dim_slice_was_a_slice = True
+
+        if isinstance(single_dim_slice, (slice, list)):
+            axes_ordering_for_transpose += [non_scalar_single_dim_slice_count]
+            non_scalar_single_dim_slice_count += 1
+
+    if num_advanced_array_idx_clusters > 1:
+        popped_item = axes_ordering_for_transpose.pop(pop_idx)
+        axes_ordering_for_transpose.insert(insert_idx, popped_item)
+            
+    axes_ordering_for_transpose = tuple(axes_ordering_for_transpose)
+
+    return axes_ordering_for_transpose
+
+
+
+def _check_and_convert_datasubset(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    kwargs = {"obj": params[obj_name], "obj_name": obj_name}
+    datasubset = czekitout.convert.to_numpy_array(**kwargs)
+
+    return datasubset
 
 
 
@@ -335,7 +670,7 @@ def save(datasubset, datasubset_id):
 
     Parameters
     ----------
-    datasubset : `any_type`
+    datasubset : `array_like`
         The HDF5 datasubset of interest to save to an HDF5 file.
     datasubset_id : :class:`h5pywrappers.datasubset.ID`
         The parameter set specifying where to save the HDF5 datasubset of
@@ -345,27 +680,53 @@ def save(datasubset, datasubset_id):
     -------
 
     """
-    accepted_types = (ID,)
-    kwargs = {"obj": datasubset_id,
-              "obj_name": "datasubset_id",
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
 
-    datasubset = czekitout.convert.to_numpy_array(obj=datasubset,
-                                                  obj_name="datasubset")
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    func_alias(**kwargs)
+
+    return None
+
+
+
+def _save(datasubset, datasubset_id):
+    current_func_name = inspect.stack()[0][3]
+
+    kwargs = {"datasubset_id": datasubset_id, "datasubset": datasubset}
+    multi_dim_slice_triplet = _calc_multi_dim_slice_triplet(**kwargs)
+
+    multi_dim_slice_1 = multi_dim_slice_triplet[0]
+    multi_dim_slice_2 = multi_dim_slice_triplet[1]
+    multi_dim_slice_3 = multi_dim_slice_triplet[2]
+
+    datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
+    dataset_id = datasubset_id_core_attrs["dataset_id"]
+
+    kwargs = {"multi_dim_slice": multi_dim_slice_1,
+              "task_requiring_transpose": current_func_name[1:]}
+    axes_ordering_for_transpose = _calc_axes_ordering_for_transpose(**kwargs)
     
-    _, multi_dim_slice_2, multi_dim_slice_3 = \
-        _multi_dim_slice_triplet(datasubset_id, datasubset)
-
-    dataset_id = datasubset_id.core_attrs["dataset_id"]
     dataset = h5pywrappers.dataset.load(dataset_id, read_only=False)
     
     try:
-        dataset[multi_dim_slice_2] = datasubset[multi_dim_slice_3]
+        kwargs = {"a": datasubset, "axes": axes_ordering_for_transpose}
+        dataset[multi_dim_slice_2] = np.transpose(**kwargs)[multi_dim_slice_3]
     except:
         dataset.file.close()
-        err_msg = _save_err_msg_1.format(path_in_file, filename)
-        raise IOError(_save_err_msg_1)
+
+        dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
+        path_in_file = dataset_id_core_attrs["path_in_file"]
+        filename = dataset_id_core_attrs["filename"]
+
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(path_in_file, filename)
+        raise IOError(err_msg)
 
     dataset.file.close()
 
@@ -377,18 +738,23 @@ def save(datasubset, datasubset_id):
 ## Define error messages ##
 ###########################
 
-_multi_dim_slice_triplet_err_msg_1 = \
+_check_and_convert_multi_dim_slice_err_msg_1 = \
+    ("The object ``{}`` must be either an instance of `NoneType` or a sequence "
+     "of items which contains at most one item being a sequence of integers, "
+     "and the remaining items being `slice` objects and/or integers.")
+
+_calc_multi_dim_slice_1_err_msg_1 = \
     ("The 'multidimensional slice object', specified by the object "
      "``datasubset_id``, must be a sequence of length equal to the rank of the "
      "HDF5 dataset at the HDF5 path ``'{}'`` of the HDF5 file at the file path "
      "``'{}'``.")
 
-_check_and_convert_multi_dim_slice_err_msg_2 = \
+_calc_multi_dim_slices_2_and_3_err_msg_1 = \
     ("The 'multidimensional slice object', specified by the object "
      "``datasubset_id``, implies an HDF5 datasubset with dimensions that are "
      "incompatible with those of the HDF5 datasubset ``datasubset``.")
 
-_check_and_convert_single_dim_slice_err_msg_1 = \
+_calc_single_dim_slice_triplet_for_case_1_err_msg_1 = \
     ("The slice for the dataset axis #{}, specified by the object "
      "``datasubset_id``, is of incorrect format: the slice contains repeating "
      "indices after converting any negative indices to their functionally "

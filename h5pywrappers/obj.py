@@ -21,11 +21,14 @@ r"""For identifying and loading HDF5 objects.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For performing deep copies.
-import copy
-
 # For accessing attributes of functions.
 import inspect
+
+# For randomly selecting items in dictionaries.
+import random
+
+# For performing deep copies.
+import copy
 
 # For checking whether a file exists at a given path, making directories, and
 # for removing files.
@@ -49,12 +52,6 @@ import fancytypes
 
 
 
-# For defining classes that support enforced validation, updatability,
-# pre-serialization, and de-serialization.
-import h5pywrappers._fancytypes
-
-
-
 ##################################
 ## Define classes and functions ##
 ##################################
@@ -66,7 +63,9 @@ __all__ = ["ID",
 
 
 def _check_and_convert_filename(params):
-    obj_name = "filename"
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     filename = czekitout.convert.to_str_from_str_like(**kwargs)
 
@@ -75,7 +74,8 @@ def _check_and_convert_filename(params):
 
 
 def _pre_serialize_filename(filename):
-    serializable_rep = filename
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+    serializable_rep = obj_to_pre_serialize
     
     return serializable_rep
 
@@ -89,7 +89,9 @@ def _de_pre_serialize_filename(serializable_rep):
 
 
 def _check_and_convert_path_in_file(params):
-    obj_name = "path_in_file"
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     path_in_file = czekitout.convert.to_str_from_str_like(**kwargs)
 
@@ -98,7 +100,8 @@ def _check_and_convert_path_in_file(params):
 
 
 def _pre_serialize_path_in_file(path_in_file):
-    serializable_rep = path_in_file
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+    serializable_rep = obj_to_pre_serialize
     
     return serializable_rep
 
@@ -111,43 +114,35 @@ def _de_pre_serialize_path_in_file(serializable_rep):
 
 
 
-_module_alias = \
-    h5pywrappers._fancytypes
-_default_filename = \
-    "data_file.h5"
-_default_path_in_file = \
-    "/data"
-_default_skip_validation_and_conversion = \
-    _module_alias.default_skip_validation_and_conversion
+_default_skip_validation_and_conversion = False
 
 
 
-cls_alias = h5pywrappers._fancytypes.PreSerializableAndUpdatable
-class ID(cls_alias):
+class ID(fancytypes.PreSerializableAndUpdatable):
     r"""A parameter set specifying an HDF5 object in an HDF5 file or an HDF5 
     file to be.
 
     Parameters
     ----------
-    filename : `str`, optional
+    filename : `str`
         The relative or absolute filename of the HDF5 file that contains the
         HDF5 object of interest.
-    path_in_file : `str`, optional
+    path_in_file : `str`
         The HDF5 path to the HDF5 object of interest contained in the HDF5 file
         specified by ``filename``.
     skip_validation_and_conversion : `bool`, optional
-        Let ``params_to_be_mapped_to_core_attrs`` be a `dict` object containing
-        only the construction parameters described above, i.e. excluding the
-        parameter ``skip_validation_and_conversion``, such that
-        ``h5pywrappers.obj.ID(**params_to_be_mapped_to_core_attrs)`` would be a
-        valid call to the constructor of the class :class:`h5pywrappers.obj.ID`.
+        Let ``validation_and_conversion_funcs`` and ``core_attrs`` denote the
+        attributes :attr:`~fancytypes.Checkable.validation_and_conversion_funcs`
+        and :attr:`~fancytypes.Checkable.core_attrs` respectively, both of which
+        being `dict` objects.
 
-        Let ``core_attrs`` denote the attribute
-        :attr:`h5pywrappers.obj.ID.core_attrs`, which is a `dict` object.
-
-        Let ``validation_and_conversion_funcs`` denote the attribute
-        :attr:`h5pywrappers.obj.ID.validation_and_conversion_funcs`, which is a
-        `dict` object.
+        Let ``params_to_be_mapped_to_core_attrs`` denote the `dict`
+        representation of the constructor parameters excluding the parameter
+        ``skip_validation_and_conversion``, where each `dict` key ``key`` is a
+        different constructor parameter name, excluding the name
+        ``"skip_validation_and_conversion"``, and
+        ``params_to_be_mapped_to_core_attrs[key]`` would yield the value of the
+        constructor parameter with the name given by ``key``.
 
         If ``skip_validation_and_conversion`` is set to ``False``, then for each
         key ``key`` in ``params_to_be_mapped_to_core_attrs``,
@@ -156,118 +151,99 @@ class ID(cls_alias):
 
         Otherwise, if ``skip_validation_and_conversion`` is set to ``True``,
         then ``core_attrs`` is set to
-        ``params_to_be_mapped_to_core_attrs``. This option is desired primarily
-        when the user wants to avoid potentially expensive copies and/or
-        conversions of the `dict` values of
+        ``params_to_be_mapped_to_core_attrs.copy()``. This option is desired
+        primarily when the user wants to avoid potentially expensive deep copies
+        and/or conversions of the `dict` values of
         ``params_to_be_mapped_to_core_attrs``, as it is guaranteed that no
         copies or conversions are made in this case.
 
-    Attributes
-    ----------
-    validation_and_conversion_funcs : `dict`, read-only
-        A `dict` object of callable objects.
-    pre_serialization_funcs : `dict`, read-only
-        A `dict` object of callable objects that has the same keys as
-        ``validation_and_conversion_funcs``. 
-
-        Let ``core_attrs_candidate_1`` be any `dict` object that has the same
-        keys as ``validation_and_conversion_funcs``, where for each `dict` key
-        ``key`` in ``core_attrs_candidate_1``,
-        ``validation_and_conversion_funcs[key](core_attrs_candidate_1)`` does
-        not raise an exception.
-
-        For each `dict` key ``key`` in ``core_attrs_candidate_1``,
-        ``pre_serialization_funcs[key](core_attrs_candidate_1[key])`` yields a
-        serializable object, i.e. it yields an object that can be passed into
-        the function ``json.dumps`` without raising an exception.
-    de_pre_serialization_funcs : `dict`, read-only
-        A `dict` object of callable objects that has the same keys as
-        ``validation_and_conversion_funcs``. 
-
-        Let ``core_attrs_candidate_1`` be as defined in the above description of
-        ``pre_serialization_funcs``.
-
-        Let ``serializable_rep`` be a `dict` object that has the same keys as
-        ``core_attrs_candidate_1``, where for each `dict` key ``key`` in
-        ``validation_and_conversion_funcs``, ``serializable_rep[key]`` is set to
-        ``pre_serialization_funcs[key](core_attrs_candidate_1[key])``.
-
-        The items of ``de_pre_serialization_funcs`` are set to callable objects
-        that lead to ``de_pre_serialization_funcs[key](serializable_rep[key])``
-        not raising an exception for each `dict` key ``key`` in
-        ``serializable_rep``.
-
-        Let ``core_attrs_candidate_2`` be a `dict` object that has the same keys
-        as ``serializable_rep``, where for each `dict` key ``key`` in
-        ``validation_and_conversion_funcs``, ``core_attrs_candidate_2[key]`` is
-        set to ``de_pre_serialization_funcs[key](serializable_rep[key])``.
-
-        The items of ``de_pre_serialization_funcs`` are set to callable objects
-        that lead to
-        ``validation_and_conversion_funcs[key](core_attrs_candidate_2)`` not
-        raising an exception for each `dict` key ``key`` in
-        ``core_attrs_candidate_2``.
-    core_attrs : `dict`, read-only
-        The "core attributes", represented as a `dict` object. ``core_attrs`` is
-        expected to satisfy ``core_attrs[key] ==
-        validation_and_conversion_funcs[key](core_attrs)`` for each `dict` key
-        ``key`` in ``validation_and_conversion_funcs``.
-
     """
+    ctor_param_names = ("filename", "path_in_file")
+    kwargs = {"namespace_as_dict": globals(),
+              "ctor_param_names": ctor_param_names}
+    
     _validation_and_conversion_funcs_ = \
-        {"filename": _check_and_convert_filename,
-         "path_in_file": _check_and_convert_path_in_file}
-
+        fancytypes.return_validation_and_conversion_funcs(**kwargs)
     _pre_serialization_funcs_ = \
-        {"filename": _pre_serialize_filename,
-         "path_in_file": _pre_serialize_path_in_file}
-
+        fancytypes.return_pre_serialization_funcs(**kwargs)
     _de_pre_serialization_funcs_ = \
-        {"filename": _de_pre_serialize_filename,
-         "path_in_file": _de_pre_serialize_path_in_file}
+        fancytypes.return_de_pre_serialization_funcs(**kwargs)
+
+    del ctor_param_names, kwargs
+
+    
 
     def __init__(self,
-                 filename=\
-                 _default_filename,
-                 path_in_file=\
-                 _default_path_in_file,
+                 filename,
+                 path_in_file,
                  skip_validation_and_conversion=\
                  _default_skip_validation_and_conversion):
         ctor_params = {key: val
                        for key, val in locals().items()
                        if (key not in ("self", "__class__"))}
-        params_to_be_mapped_to_core_attrs = ctor_params.copy()
-        del params_to_be_mapped_to_core_attrs["skip_validation_and_conversion"]
-
-        kwargs = \
-            self._return_ctor_param_subset_of_fancytypes_cls()
-        kwargs["params_to_be_mapped_to_core_attrs"] = \
-            params_to_be_mapped_to_core_attrs
-        kwargs["skip_validation_and_conversion"] = \
-            skip_validation_and_conversion
-        _ = \
-            fancytypes.PreSerializableAndUpdatable.__init__(self, **kwargs)
+        kwargs = ctor_params
+        kwargs["skip_cls_tests"] = True
+        fancytypes.PreSerializableAndUpdatable.__init__(self, **kwargs)
 
         return None
 
 
 
-def _check_and_convert_obj_id(params):
-    obj_name = "obj_id"
-    obj_id = copy.deepcopy(params[obj_name])
+    @classmethod
+    def get_validation_and_conversion_funcs(cls):
+        validation_and_conversion_funcs = \
+            cls._validation_and_conversion_funcs_.copy()
 
-    accepted_types = (ID,)
-    kwargs = {"obj": obj_id,
-              "obj_name": obj_name,
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+        return validation_and_conversion_funcs
+
+
+    
+    @classmethod
+    def get_pre_serialization_funcs(cls):
+        pre_serialization_funcs = \
+            cls._pre_serialization_funcs_.copy()
+
+        return pre_serialization_funcs
+
+
+    
+    @classmethod
+    def get_de_pre_serialization_funcs(cls):
+        de_pre_serialization_funcs = \
+            cls._de_pre_serialization_funcs_.copy()
+
+        return de_pre_serialization_funcs
+
+
+
+def _check_and_convert_obj_id(params):
+    param_name = "obj_id"
+    name_of_obj_alias_of_obj_id = params.get("name_of_obj_alias_of_"+param_name,
+                                             param_name)
+
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = copy.deepcopy(params[obj_name])
+    
+    accepted_types = (ID, type(None))
+
+    if isinstance(obj, accepted_types[1]):
+        obj_id = accepted_types[0]()
+    else:
+        kwargs = {"obj": obj,
+                  "obj_name": name_of_obj_alias_of_obj_id,
+                  "accepted_types": accepted_types}
+        czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+        obj_id = obj
 
     return obj_id
 
 
 
 def _pre_serialize_obj_id(obj_id):
-    serializable_rep = obj_id.pre_serialize()
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+    serializable_rep = obj_to_pre_serialize.pre_serialize()
     
     return serializable_rep
 
@@ -283,7 +259,9 @@ def _de_pre_serialize_obj_id(serializable_rep):
 
 
 def _check_and_convert_read_only(params):
-    obj_name = "read_only"
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     read_only = czekitout.convert.to_bool(**kwargs)
 
@@ -291,7 +269,7 @@ def _check_and_convert_read_only(params):
 
 
 
-_default_read_only = read_only
+_default_read_only = True
 
 
 
@@ -354,6 +332,8 @@ def _load(obj_id, read_only):
 
 
 def _pre_load(obj_id, read_only):
+    current_func_name = inspect.stack()[0][3]
+
     obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
     filename = obj_id_core_attrs["filename"]
     path_in_file = obj_id_core_attrs["path_in_file"]
@@ -362,10 +342,10 @@ def _pre_load(obj_id, read_only):
         if not pathlib.Path(filename).is_file():
             raise FileNotFoundError
     except FileNotFoundError:
-        err_msg = _pre_load_err_msg_1.format(filename)
+        err_msg = globals()[current_func_name+"_err_msg_1"].format(filename)
         raise FileNotFoundError(err_msg)
     except PermissionError:
-        err_msg = _pre_load_err_msg_2.format(filename)
+        err_msg = globals()[current_func_name+"_err_msg_2"].format(filename)
         raise PermissionError(err_msg)
     except BaseException as err:
         raise err
@@ -377,16 +357,17 @@ def _pre_load(obj_id, read_only):
             pass
     except OSError as err:
         if "Unable to synchronously open" not in str(err):
-            err_msg = _pre_load_err_msg_3.format(filename)
+            err_msg = globals()[current_func_name+"_err_msg_3"].format(filename)
         else:
-            err_msg = _pre_load_err_msg_4.format(filename)
+            err_msg = globals()[current_func_name+"_err_msg_4"].format(filename)
         raise OSError(err_msg)
     except BaseException as err:
         raise err
 
     with h5py.File(filename, file_mode) as file_obj:
         if path_in_file not in file_obj:
-            err_msg = _pre_load_err_msg_5.format(path_in_file, filename)
+            unformatted_err_msg = globals()[current_func_name+"_err_msg_5"]
+            err_msg = unformatted_err_msg.format(path_in_file, filename)
             raise ValueError(err_msg)
 
     return read_only
@@ -394,10 +375,12 @@ def _pre_load(obj_id, read_only):
 
 
 def _pre_save(obj_id):
+    current_func_name = inspect.stack()[0][3]
+
     obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
     filename = obj_id_core_attrs["filename"]
 
-    temp_dir_path, rm_temp_dir = _mk_parent_dir(filename)
+    first_new_dir_made = _mk_parent_dir(filename)
 
     try:
         if not pathlib.Path(filename).is_file():
@@ -405,7 +388,8 @@ def _pre_save(obj_id):
                 with h5py.File(filename, "w") as file_obj:
                     pass
             except PermissionError:
-                err_msg = _pre_save_err_msg_1.format(filename)
+                unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+                err_msg = unformatted_err_msg.format(filename)
                 raise PermissionError(err_msg)
             except BaseException as err:
                 raise err
@@ -416,48 +400,58 @@ def _pre_save(obj_id):
                 with h5py.File(filename, "a") as file_obj:
                     pass
             except PermissionError:
-                err_msg = _pre_save_err_msg_2.format(filename)
+                unformatted_err_msg = globals()[current_func_name+"_err_msg_2"]
+                err_msg = unformatted_err_msg.format(filename)
                 raise PermissionError(err_msg)
             except OSError as err:
                 if "Unable to synchronously open" not in str(err):
-                    err_msg = _pre_save_err_msg_3.format(filename)
+                    key = current_func_name+"_err_msg_3"
                 else:
-                    err_msg = _pre_load_err_msg_4.format(filename)
+                    key = current_func_name+"_err_msg_4"
+                    
+                err_msg = globals()[key].format(filename)
                 raise OSError(err_msg)
             except BaseException as err:
                 raise err
     except BaseException as err:
-        if rm_temp_dir:
-            shutil.rmtree(temp_dir_path)
+        if first_new_dir_made is not None:
+            shutil.rmtree(first_new_dir_made)
         raise err
 
-    if rm_temp_dir:
-        shutil.rmtree(temp_dir_path)
+    if first_new_dir_made is not None:
+        shutil.rmtree(first_new_dir_made)
 
     return None
 
 
 
 def _mk_parent_dir(filename):
+    current_func_name = inspect.stack()[0][3]
+
     try:
         parent_dir_path = pathlib.Path(filename).resolve().parent
         temp_dir_path = pathlib.Path(parent_dir_path.root)
-        rm_temp_dir = False
+
+        parent_dir_did_not_already_exist = False
 
         for path_part in parent_dir_path.parts[1:]:
             temp_dir_path = pathlib.Path.joinpath(temp_dir_path, path_part)
             if not temp_dir_path.is_dir():
-                rm_temp_dir = True
+                parent_dir_did_not_already_exist = True
                 break
 
         pathlib.Path(parent_dir_path).mkdir(parents=True, exist_ok=True)
     except PermissionError:
-        err_msg = _mk_parent_dir_err_msg_1.format(filename)
+        err_msg = globals()[current_func_name+"_err_msg_1"].format(filename)
         raise PermissionError(err_msg)
     except BaseException as err:
         raise err
 
-    return temp_dir_path, rm_temp_dir
+    first_new_dir_made = (temp_dir_path
+                          if parent_dir_did_not_already_exist
+                          else None)
+
+    return first_new_dir_made
 
 
 

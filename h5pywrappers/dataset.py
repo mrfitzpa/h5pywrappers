@@ -24,11 +24,11 @@ r"""For loading and saving HDF5 datasets.
 # For accessing attributes of functions.
 import inspect
 
+# For randomly selecting items in dictionaries.
+import random
+
 # For checking whether a file exists at a given path.
 import pathlib
-
-# For removing directories.
-import shutil
 
 
 
@@ -42,11 +42,11 @@ import numpy as np
 import czekitout.check
 import czekitout.convert
 
-
-
 # For defining classes that support enforced validation, updatability,
 # pre-serialization, and de-serialization.
-import h5pywrappers._fancytypes
+import fancytypes
+
+
 
 # For loading and pre-saving HDF5 objects.
 import h5pywrappers.obj
@@ -64,39 +64,62 @@ __all__ = ["load",
 
 
 def _check_and_convert_dataset_id(params):
-    obj_name = "dataset_id"
-    dataset_id = copy.deepcopy(params[obj_name])
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
 
-    accepted_types = (h5pywrappers.obj.ID,)
-    kwargs = {"obj": dataset_id,
-              "obj_name": obj_name,
-              "accepted_types": accepted_types}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    param_name_1 = "obj_id"
+    param_name_2 = "name_of_obj_alias_of_"+param_name_1
+    params = params.copy()
+    params[param_name_2] = obj_name
+    params[param_name_1] = params[params[param_name_2]]
+
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name[:char_idx]+param_name_1
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    dataset_id = func_alias(params)
 
     return dataset_id
 
 
 
 def _pre_serialize_dataset_id(dataset_id):
-    obj_id = dataset_id
-    serializable_rep = h5pywrappers.obj._pre_serialize_obj_id(obj_id)
+    obj_to_pre_serialize = random.choice(list(locals().values()))
+
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 15
+
+    param_name = "obj_id"
+
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name[:char_idx]+param_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    kwargs = {param_name: obj_to_pre_serialize}
+    serializable_rep = func_alias(**kwargs)
     
     return serializable_rep
 
 
 
 def _de_pre_serialize_dataset_id(serializable_rep):
-    kwargs = {"serializable_rep": serializable_rep,
-              "skip_validation_and_conversion": True}
-    dataset_id = h5pywrappers.obj.ID.de_pre_serialize(**kwargs)
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 18
+
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name[:char_idx]+"obj_id"
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    dataset_id = func_alias(serializable_rep)
 
     return dataset_id
 
 
 
 def _check_and_convert_read_only(params):
+    current_func_name = inspect.stack()[0][3]
+    
     module_alias = h5pywrappers.obj
-    func_alias = module_alias._check_and_convert_read_only
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
     read_only = func_alias(params)
 
     return read_only
@@ -142,13 +165,15 @@ def load(dataset_id, read_only=_default_read_only):
     func_name = "_" + inspect.stack()[0][3]
     func_alias = globals()[func_name]
     kwargs = params
-    obj = func_alias(**kwargs)
+    dataset = func_alias(**kwargs)
 
     return dataset
 
 
 
 def _load(dataset_id, read_only):
+    current_func_name = inspect.stack()[0][3]
+
     kwargs = {"obj_id": dataset_id, "read_only": read_only}
     dataset = h5pywrappers.obj.load(**kwargs)
     
@@ -164,8 +189,9 @@ def _load(dataset_id, read_only):
         dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
         filename = dataset_id_core_attrs["filename"]
         path_in_file = dataset_id_core_attrs["path_in_file"]
-        
-        err_msg = _load_err_msg_1.format(path_in_file, filename)
+
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(path_in_file, filename)
         raise TypeError(err_msg)
 
     return dataset
@@ -173,28 +199,44 @@ def _load(dataset_id, read_only):
 
 
 def _check_and_convert_dataset(params):
-    obj_name = "dataset"
+    param_name = \
+        "dataset"
+    name_of_obj_alias_of_dataset = \
+        params.get("name_of_obj_alias_of_"+param_name, param_name)
+
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
     obj = params[obj_name]
     
     if not isinstance(obj, (h5py._hl.dataset.Dataset, str)):
         try:
-            kwargs = {"obj": obj, "obj_name": obj_name}
+            kwargs = {"obj": obj, "obj_name": name_of_obj_alias_of_dataset}
             dataset = czekitout.convert.to_numpy_array(**kwargs)
         except:
-            raise TypeError(_check_and_convert_dataset_err_msg_1)
+            err_msg = globals()[current_func_name+"_err_msg_1"]
+            raise TypeError(err_msg)
+    else:
+        dataset = obj
 
     return dataset
 
 
 
 def _check_and_convert_write_mode(params):
-    obj_name = "write_mode"
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
 
     func_alias = czekitout.check.if_one_of_any_accepted_strings
-    kwargs = {"obj": params[obj_name],
+    kwargs = {"obj": obj,
               "obj_name": obj_name,
               "accepted_strings": ("w", "w-", "a", "a-")}
-    write_mode = func_alias(params)
+    func_alias(**kwargs)
+
+    kwargs = {"obj": obj, "obj_name": obj_name}
+    write_mode = czekitout.convert.to_str_from_str_like(**kwargs)
 
     return write_mode
 
@@ -248,7 +290,7 @@ def save(dataset, dataset_id, write_mode=_default_write_mode):
 
 
 def _save(dataset, dataset_id, write_mode):
-    dataset, write_mode = _pre_save(dataset, dataset_id, write_mode)
+    _pre_save(dataset, dataset_id, write_mode)
 
     dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
     filename = dataset_id_core_attrs["filename"]
@@ -265,37 +307,34 @@ def _save(dataset, dataset_id, write_mode):
 
 
 def _pre_save(dataset, dataset_id, write_mode):
+    current_func_name = inspect.stack()[0][3]
+
     h5pywrappers.obj._pre_save(dataset_id)
 
     dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
     filename = dataset_id_core_attrs["filename"]
     path_in_file = dataset_id_core_attrs["path_in_file"]
     
-    parent_dir_path, rm_parent_dir_if_error_occurs = \
-        h5pywrappers.obj._mk_parent_dir(filename)
+    first_new_dir_made = h5pywrappers.obj._mk_parent_dir(filename)
 
-    try:
-        if write_mode in ("w", "w-"):
-            if write_mode == "w-":
-                if pathlib.Path(filename).is_file():
-                    err_msg = _pre_save_err_msg_1.format(path_in_file, filename)
-                    raise IOError(err_msg)
-            with h5py.File(filename, "w") as file_obj:
-                pass
+    if write_mode in ("w", "w-"):
+        if write_mode == "w-":
+            if pathlib.Path(filename).is_file():
+                unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+                err_msg = unformatted_err_msg.format(path_in_file, filename)
+                raise IOError(err_msg)
+        with h5py.File(filename, "w") as file_obj:
+            pass
         
-        with h5py.File(filename, "a") as file_obj:
-            if path_in_file in file_obj:
-                if write_mode == "a-":
-                    err_msg = _pre_save_err_msg_2.format(path_in_file, filename)
-                    raise IOError(err_msg)
-                del file_obj[path_in_file]
-                
-    except BaseException as err:
-        if rm_parent_dir_if_error_occurs:
-            shutil.rmtree(parent_dir_path)
-        raise err
+    with h5py.File(filename, "a") as file_obj:
+        if path_in_file in file_obj:
+            if write_mode == "a-":
+                unformatted_err_msg = globals()[current_func_name+"_err_msg_2"]
+                err_msg = unformatted_err_msg.format(path_in_file, filename)
+                raise IOError(err_msg)
+            del file_obj[path_in_file]
 
-    return dataset, write_mode
+    return None
 
 
 

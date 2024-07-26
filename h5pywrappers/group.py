@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+# Copyright 2024 Matthew Fitzpatrick.
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 r"""For loading and saving HDF5 groups.
 
 """
@@ -8,6 +21,9 @@ r"""For loading and saving HDF5 groups.
 ## Load libraries/packages/modules ##
 #####################################
 
+# For accessing attributes of functions.
+import inspect
+
 # For checking whether a file exists at a given path.
 import pathlib
 
@@ -16,7 +32,7 @@ import shutil
 
 
 
-# For saving HDF5 datasets and checking whether an object is an HDF5 dataset.
+# For saving HDF5 groups and checking whether an object is an HDF5 group.
 import h5py
 
 # For type-checking, validating, and converting objects.
@@ -28,18 +44,8 @@ import czekitout.convert
 # For loading and pre-saving HDF5 objects.
 import h5pywrappers.obj
 
-
-
-############################
-## Authorship information ##
-############################
-
-__author__     = "Matthew Fitzpatrick"
-__copyright__  = "Copyright 2023"
-__credits__    = ["Matthew Fitzpatrick"]
-__maintainer__ = "Matthew Fitzpatrick"
-__email__      = "mrfitzpa@uvic.ca"
-__status__     = "Development"
+# For reusing validation and conversions functions.
+import h5pywrappers.dataset
 
 
 
@@ -53,7 +59,42 @@ __all__ = ["load",
 
 
 
-def load(group_id, read_only=True):
+def _check_and_convert_group_id(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
+    
+    accepted_types = (h5pywrappers.obj.ID,)
+
+    kwargs = {"obj": obj,
+              "obj_name": obj_name,
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    group_id = obj
+
+    return group_id
+
+
+
+def _check_and_convert_read_only(params):
+    current_func_name = inspect.stack()[0][3]
+    
+    module_alias = h5pywrappers.obj
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    read_only = func_alias(params)
+
+    return read_only
+
+
+
+_module_alias = h5pywrappers.obj
+_default_read_only = _module_alias._default_read_only
+
+
+
+def load(group_id, read_only=_default_read_only):
     r"""Load an HDF5 group from an HDF5 file.
 
     Note that users can access the HDF5 file object to which the HDF5 group of
@@ -78,12 +119,30 @@ def load(group_id, read_only=True):
         The HDF5 group of interest.
 
     """
-    group = h5pywrappers.obj.load(group_id, read_only)
-    accepted_types = (h5py._hl.group.Group,)
-    kwargs = {"obj": group,
-              "obj_name": "group",
-              "accepted_types": accepted_types}
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
+
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    group = func_alias(**kwargs)
+
+    return group
+
+
+
+def _load(group_id, read_only):
+    kwargs = {"obj_id": group_id, "read_only": read_only}
+    group = h5pywrappers.obj.load(**kwargs)
+    
     try:
+        accepted_types = (h5py._hl.group.Group,)
+        kwargs = {"obj": group,
+                  "obj_name": "group",
+                  "accepted_types": accepted_types}
         czekitout.check.if_instance_of_any_accepted_types(**kwargs)
     except BaseException as err:
         group.file.close()
@@ -93,34 +152,42 @@ def load(group_id, read_only=True):
 
 
 
-def _check_and_convert_group_id(ctor_params):
-    group_id = ctor_params["group_id"]
+def _check_and_convert_group(params):
+    current_func_name = inspect.stack()[0][3]
+    char_idx = 19
+    obj_name = current_func_name[char_idx:]
+    obj = params[obj_name]
     
-    accepted_types = (h5pywrappers.obj.ID,)
-    kwargs = {"obj": group_id,
-              "obj_name": "group_id",
+    accepted_types = (h5py._hl.group.Group, type(None))
+
+    kwargs = {"obj": obj,
+              "obj_name": obj_name,
               "accepted_types": accepted_types}
     czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    group = obj
 
-    return group_id
+    return group
 
 
 
-def _pre_serialize_group_id(group_id):
-    serializable_rep = h5pywrappers.obj._pre_serialize_obj_id(group_id)
+def _check_and_convert_write_mode(params):
+    current_func_name = inspect.stack()[0][3]
     
-    return serializable_rep
+    module_alias = h5pywrappers.dataset
+    basename_of_func_alias = current_func_name
+    func_alias = module_alias.__dict__[basename_of_func_alias]
+    write_mode = func_alias(params)
+
+    return write_mode
 
 
 
-def _de_pre_serialize_group_id(serializable_rep):
-    group_id = h5pywrappers.obj._de_pre_serialize_obj_id(serializable_rep)
-
-    return group_id
+_module_alias = h5pywrappers.dataset
+_default_write_mode = _module_alias._default_write_mode
 
 
 
-def save(group, group_id, write_mode="w-"):
+def save(group, group_id, write_mode=_default_write_mode):
     r"""Save an HDF5 group to an HDF5 file.
 
     Parameters
@@ -149,48 +216,54 @@ def save(group, group_id, write_mode="w-"):
     -------
 
     """
+    params = locals()
+    for param_name in params:
+        func_name = "_check_and_convert_" + param_name
+        func_alias = globals()[func_name]
+        params[param_name] = func_alias(params)
+
+    func_name = "_" + inspect.stack()[0][3]
+    func_alias = globals()[func_name]
+    kwargs = params
+    func_alias(**kwargs)
+
+    return None
+
+
+
+def _save(group, group_id, write_mode):
     group, write_mode = _pre_save(group, group_id, write_mode)
 
-    filename = group_id.core_attrs["filename"]
-    path_in_file = group_id.core_attrs["path_in_file"]
+    group_id_core_attrs = group_id.get_core_attrs(deep_copy=False)
+    filename = group_id_core_attrs["filename"]
+    path_in_file = group_id_core_attrs["path_in_file"]
 
-    try:
-        with h5py.File(filename, "a") as file_obj:
-            if group is None:
-                file_obj.create_group(path_in_file)
-            else:
-                file_obj.copy(group, path_in_file)
-    except BaseException as err:
-        raise err
+    with h5py.File(filename, "a") as file_obj:
+        if group is None:
+            file_obj.create_group(path_in_file)
+        else:
+            file_obj.copy(group, path_in_file)
 
     return None
 
 
 
 def _pre_save(group, group_id, write_mode):
-    kwargs = {"obj": group,
-              "obj_name": "group",
-              "accepted_types": (h5py._hl.group.Group, type(None))}
-    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
-
-    write_mode = czekitout.convert.to_str_from_str_like(obj=write_mode,
-                                                        obj_name="write_mode")
-    accepted_values = ("w", "w-", "a", "a-")
-    if write_mode not in accepted_values:
-        raise ValueError(_pre_save_err_msg_1)
+    current_func_name = inspect.stack()[0][3]
 
     h5pywrappers.obj._pre_save(group_id)
 
     filename = group_id.core_attrs["filename"]
     path_in_file = group_id.core_attrs["path_in_file"]
-    parent_dir_path, rm_parent_dir_if_error_occurs = \
-        h5pywrappers.obj._mk_parent_dir(filename)
+    first_new_dir_made = h5pywrappers.obj._mk_parent_dir(filename)
 
     try:
         if write_mode in ("w", "w-"):
             if write_mode == "w-":
                 if pathlib.Path(filename).is_file():
-                    err_msg = _pre_save_err_msg_2.format(path_in_file, filename)
+                    key = current_func_name+"_err_msg_1"
+                    unformatted_err_msg = globals()[key]
+                    err_msg = unformatted_err_msg.format(path_in_file, filename)
                     raise IOError(err_msg)
             with h5py.File(filename, "w") as file_obj:
                 pass
@@ -198,13 +271,15 @@ def _pre_save(group, group_id, write_mode):
         with h5py.File(filename, "a") as file_obj:
             if path_in_file in file_obj:
                 if write_mode == "a-":
-                    err_msg = _pre_save_err_msg_3.format(path_in_file, filename)
+                    key = current_func_name+"_err_msg_2"
+                    unformatted_err_msg = globals()[key]
+                    err_msg = unformatted_err_msg.format(path_in_file, filename)
                     raise IOError(err_msg)
                 del file_obj[path_in_file]
                 
     except BaseException as err:
-        if rm_parent_dir_if_error_occurs:
-            shutil.rmtree(parent_dir_path)
+        if first_new_dir_made is not None:
+            shutil.rmtree(first_new_dir_made)
         raise err
 
     return group, write_mode
@@ -216,14 +291,11 @@ def _pre_save(group, group_id, write_mode):
 ###########################
 
 _pre_save_err_msg_1 = \
-    ("The object ``write_mode`` must be one of the following strings: ``'w'``, "
-     "``'w-'``, ``'a'``, or ``'a-'``.")
-_pre_save_err_msg_2 = \
     ("Cannot save the HDF5 group to the HDF5 path ``'{}'`` of the HDF5 file at "
      "the file path ``'{}'`` because an HDF5 file already exists at said file "
      "path and the parameter ``write_mode`` was set to ``'w-'``, which "
      "prohibits modifying any such pre-existing file.")
-_pre_save_err_msg_3 = \
+_pre_save_err_msg_2 = \
     ("Cannot save the HDF5 group to the HDF5 path ``'{}'`` of the HDF5 file at "
      "the file path ``'{}'`` because an HDF5 object already exists there and "
      "the parameter ``write_mode`` was set to ``'a-'``, which prohibits "

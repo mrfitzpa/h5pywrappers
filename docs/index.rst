@@ -28,7 +28,7 @@ Contents
    :maxdepth: 6
    :numbered:
 
-   home <self>
+   Home <self>
    INSTALL
    Reference <_autosummary/h5pywrappers>
    examples
