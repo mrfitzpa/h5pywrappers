@@ -35,9 +35,8 @@ import shutil
 # For saving HDF5 groups and checking whether an object is an HDF5 group.
 import h5py
 
-# For type-checking, validating, and converting objects.
+# For validating objects.
 import czekitout.check
-import czekitout.convert
 
 
 
@@ -239,10 +238,11 @@ def _save(group, group_id, write_mode):
     path_in_file = group_id_core_attrs["path_in_file"]
 
     with h5py.File(filename, "a") as file_obj:
-        if group is None:
-            file_obj.create_group(path_in_file)
-        else:
-            file_obj.copy(group, path_in_file)
+        if path_in_file not in file_obj:
+            if group is None:
+                file_obj.create_group(path_in_file)
+            else:
+                file_obj.copy(group, path_in_file)
 
     return None
 
@@ -257,30 +257,30 @@ def _pre_save(group, group_id, write_mode):
     path_in_file = group_id.core_attrs["path_in_file"]
     first_new_dir_made = h5pywrappers.obj._mk_parent_dir(filename)
 
-    try:
-        if write_mode in ("w", "w-"):
-            if write_mode == "w-":
-                if pathlib.Path(filename).is_file():
-                    key = current_func_name+"_err_msg_1"
-                    unformatted_err_msg = globals()[key]
-                    err_msg = unformatted_err_msg.format(path_in_file, filename)
-                    raise IOError(err_msg)
-            with h5py.File(filename, "w") as file_obj:
-                pass
-        
-        with h5py.File(filename, "a") as file_obj:
-            if path_in_file in file_obj:
-                if write_mode == "a-":
-                    key = current_func_name+"_err_msg_2"
-                    unformatted_err_msg = globals()[key]
-                    err_msg = unformatted_err_msg.format(path_in_file, filename)
-                    raise IOError(err_msg)
+    file_already_exists = pathlib.Path(filename).is_file()
+
+    if write_mode in ("w", "w-"):
+        if write_mode == "w-":
+            if file_already_exists:
+                key = current_func_name+"_err_msg_1"
+                unformatted_err_msg = globals()[key]
+                err_msg = unformatted_err_msg.format(path_in_file, filename)
+                raise IOError(err_msg)
+        with h5py.File(filename, "w") as file_obj:
+            pass
+        file_is_not_new = False
+    else:
+        file_is_not_new = file_already_exists
+
+    with h5py.File(filename, "a") as file_obj:        
+        if path_in_file in file_obj:
+            if (write_mode == "a-") and file_is_not_new:
+                key = current_func_name+"_err_msg_2"
+                unformatted_err_msg = globals()[key]
+                err_msg = unformatted_err_msg.format(path_in_file, filename)
+                raise IOError(err_msg)
+            if file_is_not_new:
                 del file_obj[path_in_file]
-                
-    except BaseException as err:
-        if first_new_dir_made is not None:
-            shutil.rmtree(first_new_dir_made)
-        raise err
 
     return group, write_mode
 

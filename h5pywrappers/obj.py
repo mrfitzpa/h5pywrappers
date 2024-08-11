@@ -95,6 +95,10 @@ def _check_and_convert_path_in_file(params):
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     path_in_file = czekitout.convert.to_str_from_str_like(**kwargs)
 
+    if len(path_in_file) == 0:
+        err_msg = globals()[current_func_name+"_err_msg_1"]
+        raise ValueError(err_msg)
+
     return path_in_file
 
 
@@ -226,16 +230,13 @@ def _check_and_convert_obj_id(params):
     obj_name = current_func_name[char_idx:]
     obj = copy.deepcopy(params[obj_name])
     
-    accepted_types = (ID, type(None))
+    accepted_types = (ID,)
 
-    if isinstance(obj, accepted_types[1]):
-        obj_id = accepted_types[0]()
-    else:
-        kwargs = {"obj": obj,
-                  "obj_name": name_of_obj_alias_of_obj_id,
-                  "accepted_types": accepted_types}
-        czekitout.check.if_instance_of_any_accepted_types(**kwargs)
-        obj_id = obj
+    kwargs = {"obj": obj,
+              "obj_name": name_of_obj_alias_of_obj_id,
+              "accepted_types": accepted_types}
+    czekitout.check.if_instance_of_any_accepted_types(**kwargs)
+    obj_id = obj
 
     return obj_id
 
@@ -338,31 +339,25 @@ def _pre_load(obj_id, read_only):
     filename = obj_id_core_attrs["filename"]
     path_in_file = obj_id_core_attrs["path_in_file"]
 
+    file_mode = "r" if read_only else "a"
+
     try:
         if not pathlib.Path(filename).is_file():
             raise FileNotFoundError
+        with h5py.File(filename, file_mode) as file_obj:
+            pass
     except FileNotFoundError:
         err_msg = globals()[current_func_name+"_err_msg_1"].format(filename)
         raise FileNotFoundError(err_msg)
     except PermissionError:
         err_msg = globals()[current_func_name+"_err_msg_2"].format(filename)
         raise PermissionError(err_msg)
-    except BaseException as err:
-        raise err
-
-    file_mode = "r" if read_only else "a"
-
-    try:
-        with h5py.File(filename, file_mode) as file_obj:
-            pass
     except OSError as err:
-        if "Unable to synchronously open" not in str(err):
+        if "file signature not found" in str(err):
             err_msg = globals()[current_func_name+"_err_msg_3"].format(filename)
         else:
             err_msg = globals()[current_func_name+"_err_msg_4"].format(filename)
         raise OSError(err_msg)
-    except BaseException as err:
-        raise err
 
     with h5py.File(filename, file_mode) as file_obj:
         if path_in_file not in file_obj:
@@ -379,44 +374,43 @@ def _pre_save(obj_id):
 
     obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
     filename = obj_id_core_attrs["filename"]
+    path_in_file = obj_id.core_attrs["path_in_file"]
 
     first_new_dir_made = _mk_parent_dir(filename)
 
     try:
-        if not pathlib.Path(filename).is_file():
-            try:
-                with h5py.File(filename, "w") as file_obj:
-                    pass
-            except PermissionError:
-                unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
-                err_msg = unformatted_err_msg.format(filename)
-                raise PermissionError(err_msg)
-            except BaseException as err:
-                raise err
+        file_does_not_exist = (not pathlib.Path(filename).is_file())
+    except PermissionError:
+        unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+        err_msg = unformatted_err_msg.format(filename)
+        raise PermissionError(err_msg)
+            
+    if file_does_not_exist:
+        try:
+            with h5py.File(filename, "w") as file_obj:
+                pass
+        except PermissionError:
+            unformatted_err_msg = globals()[current_func_name+"_err_msg_1"]
+            err_msg = unformatted_err_msg.format(filename)
+            raise PermissionError(err_msg)
         
-            pathlib.Path(filename).unlink()
-        else:
-            try:
-                with h5py.File(filename, "a") as file_obj:
-                    pass
-            except PermissionError:
-                unformatted_err_msg = globals()[current_func_name+"_err_msg_2"]
-                err_msg = unformatted_err_msg.format(filename)
-                raise PermissionError(err_msg)
-            except OSError as err:
-                if "Unable to synchronously open" not in str(err):
-                    key = current_func_name+"_err_msg_3"
-                else:
-                    key = current_func_name+"_err_msg_4"
-                    
-                err_msg = globals()[key].format(filename)
-                raise OSError(err_msg)
-            except BaseException as err:
-                raise err
-    except BaseException as err:
-        if first_new_dir_made is not None:
-            shutil.rmtree(first_new_dir_made)
-        raise err
+        pathlib.Path(filename).unlink()
+    else:
+        try:
+            with h5py.File(filename, "a") as file_obj:
+                pass
+        except PermissionError:
+            unformatted_err_msg = globals()[current_func_name+"_err_msg_2"]
+            err_msg = unformatted_err_msg.format(filename)
+            raise PermissionError(err_msg)
+        except OSError as err:
+            key = (current_func_name + "_err_msg_3"
+                   if ("file signature not found" in str(err))
+                   else current_func_name + "_err_msg_4")                    
+            err_msg = globals()[key].format(filename)
+            raise OSError(err_msg)
+        
+    _check_for_intermediary_datasets_along_path_in_file(obj_id)
 
     if first_new_dir_made is not None:
         shutil.rmtree(first_new_dir_made)
@@ -444,8 +438,6 @@ def _mk_parent_dir(filename):
     except PermissionError:
         err_msg = globals()[current_func_name+"_err_msg_1"].format(filename)
         raise PermissionError(err_msg)
-    except BaseException as err:
-        raise err
 
     first_new_dir_made = (temp_dir_path
                           if parent_dir_did_not_already_exist
@@ -455,9 +447,43 @@ def _mk_parent_dir(filename):
 
 
 
+def _check_for_intermediary_datasets_along_path_in_file(obj_id):
+    current_func_name = inspect.stack()[0][3]
+
+    obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
+    filename = obj_id_core_attrs["filename"]
+    path_in_file = obj_id.core_attrs["path_in_file"]
+
+    file_is_not_new = pathlib.Path(filename).is_file()
+
+    if file_is_not_new:
+        with h5py.File(filename, "a") as file_obj:
+            if path_in_file not in file_obj:
+                path_in_file = pathlib.Path(path_in_file)
+                num_parents = len(path_in_file.parents)
+                for parent_idx in range(-1, -num_parents-1, -1):
+                    path = str(path_in_file.parents[num_parents+parent_idx])
+                    if path in file_obj:
+                        if isinstance(file_obj[path], h5py._hl.dataset.Dataset):
+                            key = current_func_name + "_err_msg_1"
+                            unformatted_err_msg = globals()[key]
+                            err_msg = unformatted_err_msg.format(path_in_file,
+                                                                 path,
+                                                                 filename)
+                            raise ValueError(err_msg)
+                    else:
+                        break
+
+    return None
+
+
+
 ###########################
 ## Define error messages ##
 ###########################
+
+_check_and_convert_path_in_file_err_msg_1 = \
+    ("The object ``path_in_file`` must be a non-empty string.")
 
 _pre_load_err_msg_1 = \
     ("No file exists at the file path ``'{}'``.")
@@ -485,3 +511,8 @@ _pre_save_err_msg_4 = \
 
 _mk_parent_dir_err_msg_1 = \
     _pre_load_err_msg_2
+
+_check_for_intermediary_datasets_along_path_in_file_err_msg_1 = \
+    ("The object ``path_in_file``, which stores the string ``'{}'``, does not "
+     "specify a valid HDF5 path: there is an HDF5 dataset at the intermediate "
+     "path ``'{}'`` of the HDF5 file ``'{}'``.")
