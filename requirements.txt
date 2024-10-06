@@ -1,2 +1,2 @@
-fancytypes @ git+https://github.com/mrfitzpa/fancytypes.git
+fancytypes @ git+https://github.com/mrfitzpa/fancytypes.git@legacy
 h5py
