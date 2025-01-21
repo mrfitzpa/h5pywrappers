@@ -137,9 +137,9 @@ def load(dataset_id, read_only=_default_read_only):
 
     """
     params = locals()
+    global_symbol_table = globals()
     for param_name in params:
         func_name = "_check_and_convert_" + param_name
-        global_symbol_table = globals()
         func_alias = global_symbol_table[func_name]
         params[param_name] = func_alias(params)
 
@@ -252,9 +252,9 @@ def save(dataset, dataset_id, write_mode=_default_write_mode):
 
     """
     params = locals()
+    global_symbol_table = globals()
     for param_name in params:
         func_name = "_check_and_convert_" + param_name
-        global_symbol_table = globals()
         func_alias = global_symbol_table[func_name]
         params[param_name] = func_alias(params)
 
