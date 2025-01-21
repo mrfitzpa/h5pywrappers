@@ -73,7 +73,8 @@ def load(scalar_id):
     params = locals()
     for param_name in params:
         func_name = "_check_and_convert_" + param_name
-        func_alias = globals()[func_name]
+        global_symbol_table = globals()
+        func_alias = global_symbol_table[func_name]
         params[param_name] = func_alias(params)
 
     kwargs = params
@@ -186,7 +187,8 @@ def save(scalar, scalar_id, write_mode=_default_write_mode):
     params = locals()
     for param_name in params:
         func_name = "_check_and_convert_" + param_name
-        func_alias = globals()[func_name]
+        global_symbol_table = globals()
+        func_alias = global_symbol_table[func_name]
         params[param_name] = func_alias(params)
 
     kwargs = params
