@@ -21,12 +21,6 @@ r"""For loading and saving HDF5 datasets.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
-# For randomly selecting items in dictionaries.
-import random
-
 # For checking whether a file exists at a given path.
 import pathlib
 
@@ -64,9 +58,7 @@ __all__ = ["load",
 
 
 def _check_and_convert_dataset_id(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "dataset_id"
 
     param_name_1 = "obj_id"
     param_name_2 = "name_of_obj_alias_of_"+param_name_1
@@ -75,8 +67,7 @@ def _check_and_convert_dataset_id(params):
     params[param_name_1] = params[params[param_name_2]]
 
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name[:char_idx]+param_name_1
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_obj_id
     dataset_id = func_alias(params)
 
     return dataset_id
@@ -84,16 +75,12 @@ def _check_and_convert_dataset_id(params):
 
 
 def _pre_serialize_dataset_id(dataset_id):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
-
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 15
+    obj_to_pre_serialize = dataset_id
 
     param_name = "obj_id"
 
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name[:char_idx]+param_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._pre_serialize_obj_id
     kwargs = {param_name: obj_to_pre_serialize}
     serializable_rep = func_alias(**kwargs)
     
@@ -102,12 +89,8 @@ def _pre_serialize_dataset_id(dataset_id):
 
 
 def _de_pre_serialize_dataset_id(serializable_rep):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 18
-
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name[:char_idx]+"obj_id"
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._de_pre_serialize_obj_id
     dataset_id = func_alias(serializable_rep)
 
     return dataset_id
@@ -115,11 +98,8 @@ def _de_pre_serialize_dataset_id(serializable_rep):
 
 
 def _check_and_convert_read_only(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_read_only
     read_only = func_alias(params)
 
     return read_only
@@ -162,20 +142,18 @@ def load(dataset_id, read_only=_default_read_only):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    dataset = func_alias(**kwargs)
+    dataset = _load(**kwargs)
 
     return dataset
 
 
 
 def _load(dataset_id, read_only):
-    current_func_name = inspect.stack()[0][3]
-
     kwargs = {"obj_id": dataset_id, "read_only": read_only}
     dataset = h5pywrappers.obj.load(**kwargs)
+
+    current_func_name = "_load"
     
     accepted_types = (h5py._hl.dataset.Dataset,)
     kwargs = {"obj": dataset,
@@ -204,10 +182,10 @@ def _check_and_convert_dataset(params):
     name_of_obj_alias_of_dataset = \
         params.get("name_of_obj_alias_of_"+param_name, param_name)
 
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "dataset"
     obj = params[obj_name]
+
+    current_func_name = "_check_and_convert_dataset"
     
     if not isinstance(obj, (h5py._hl.dataset.Dataset, str)):
         try:
@@ -224,9 +202,7 @@ def _check_and_convert_dataset(params):
 
 
 def _check_and_convert_write_mode(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "write_mode"
     obj = params[obj_name]
 
     func_alias = czekitout.check.if_one_of_any_accepted_strings
@@ -280,10 +256,8 @@ def save(dataset, dataset_id, write_mode=_default_write_mode):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    obj = func_alias(**kwargs)
+    obj = _save(**kwargs)
 
     return None
 
@@ -307,8 +281,6 @@ def _save(dataset, dataset_id, write_mode):
 
 
 def _pre_save(dataset, dataset_id, write_mode):
-    current_func_name = inspect.stack()[0][3]
-
     h5pywrappers.obj._pre_save(dataset_id)
 
     dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
@@ -316,6 +288,8 @@ def _pre_save(dataset, dataset_id, write_mode):
     path_in_file = dataset_id_core_attrs["path_in_file"]
     
     first_new_dir_made = h5pywrappers.obj._mk_parent_dir(filename)
+
+    current_func_name = "_pre_save"
 
     if write_mode in ("w", "w-"):
         if write_mode == "w-":

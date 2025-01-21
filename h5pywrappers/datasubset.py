@@ -21,14 +21,6 @@ r"""For loading and saving HDF5 "datasubsets".
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
-# For randomly selecting items in dictionaries.
-import random
-
-
-
 # For general array handling.
 import numpy as np
 
@@ -62,11 +54,8 @@ __all__ = ["ID",
 
 
 def _check_and_convert_dataset_id(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.dataset
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_dataset_id
     dataset_id = func_alias(params)
 
     return dataset_id
@@ -74,15 +63,12 @@ def _check_and_convert_dataset_id(params):
 
 
 def _pre_serialize_dataset_id(dataset_id):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
+    obj_to_pre_serialize = dataset_id
 
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 15
-    obj_name = current_func_name[char_idx:]
+    obj_name = "dataset_id"
     
     module_alias = h5pywrappers.dataset
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._pre_serialize_dataset_id
     kwargs = {obj_name: obj_to_pre_serialize}
     serializable_rep = func_alias(**kwargs)
     
@@ -91,11 +77,8 @@ def _pre_serialize_dataset_id(dataset_id):
 
 
 def _de_pre_serialize_dataset_id(serializable_rep):
-    current_func_name = inspect.stack()[0][3]
-
     module_alias = h5pywrappers.dataset
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._de_pre_serialize_dataset_id
     dataset_id = func_alias(serializable_rep)
 
     return dataset_id
@@ -103,10 +86,10 @@ def _de_pre_serialize_dataset_id(serializable_rep):
 
 
 def _check_and_convert_multi_dim_slice(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "multi_dim_slice"
     obj = params[obj_name]
+
+    current_func_name = "_check_and_convert_multi_dim_slice"
 
     if obj is not None:
         try:
@@ -275,9 +258,7 @@ class ID(fancytypes.PreSerializableAndUpdatable):
 
 
 def _check_and_convert_datasubset_id(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "datasubset_id"
     obj = params[obj_name]
     
     accepted_types = (ID,)
@@ -315,18 +296,14 @@ def load(datasubset_id):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    datasubset = func_alias(**kwargs)
+    datasubset = _load(**kwargs)
 
     return datasubset
 
 
 
 def _load(datasubset_id):
-    current_func_name = inspect.stack()[0][3]
-
     kwargs = {"datasubset_id": datasubset_id, "datasubset": None}
     multi_dim_slice_triplet = _calc_multi_dim_slice_triplet(**kwargs)
 
@@ -336,6 +313,8 @@ def _load(datasubset_id):
 
     datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
     dataset_id = datasubset_id_core_attrs["dataset_id"]
+
+    current_func_name = "_load"
 
     kwargs = {"multi_dim_slice": multi_dim_slice_1,
               "task_requiring_transpose": current_func_name[1:]}
@@ -390,11 +369,11 @@ def _calc_multi_dim_slice_triplet(datasubset_id, datasubset):
 
 
 def _calc_multi_dim_slice_1(datasubset_id, dataset_shape):
-    current_func_name = inspect.stack()[0][3]
-
     datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
     
     dataset_rank = len(dataset_shape)
+
+    current_func_name = "_calc_multi_dim_slice_1"
 
     multi_dim_slice_1 = datasubset_id_core_attrs["multi_dim_slice"]
     if multi_dim_slice_1 is None:
@@ -422,8 +401,6 @@ def _calc_multi_dim_slices_2_and_3(datasubset_id,
                                    dataset_shape,
                                    multi_dim_slice_1,
                                    axes_ordering_for_transpose):
-    current_func_name = inspect.stack()[0][3]
-
     datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
     dataset_id = datasubset_id_core_attrs["dataset_id"]
     
@@ -455,6 +432,8 @@ def _calc_multi_dim_slices_2_and_3(datasubset_id,
                 dataset_dim = dataset_shape[axis]
                 datasubset_dim = len(np.arange(dataset_dim)[single_dim_slice_2])
                 datasubset_shape.append(datasubset_dim)
+
+    current_func_name = "_calc_multi_dim_slices_2_and_3"
                 
     if datasubset is not None:
         datasubset_shape = tuple(datasubset_shape[axis_idx]
@@ -495,12 +474,12 @@ def _calc_single_dim_slice_triplet_for_case_1(single_dim_slice_1,
                                               max_allowed_idx,
                                               axis,
                                               dataset_id):
-    current_func_name = inspect.stack()[0][3]
-
     temp = []
     for idx in single_dim_slice_1:
         idx = _check_and_shift_idx(idx, max_allowed_idx, axis, dataset_id)
         temp.append(idx)
+
+    current_func_name = "_calc_single_dim_slice_triplet_for_case_1"
             
     if len(temp) != len(set(temp)):
         dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
@@ -546,9 +525,8 @@ def _calc_single_dim_slice_triplet_for_case_2(single_dim_slice_1,
 
 
 def _check_and_shift_idx(idx, max_allowed_idx, axis, dataset_id):
-    current_func_name = inspect.stack()[0][3]
-
     idx = (max_allowed_idx+1)+idx if (idx < 0) else idx
+    current_func_name = "_check_and_shift_idx"
 
     if (idx < 0) or (idx > max_allowed_idx):
         dataset_id_core_attrs = dataset_id.get_core_attrs(deep_copy=False)
@@ -648,9 +626,7 @@ def _calc_axes_ordering_for_transpose(multi_dim_slice,
 
 
 def _check_and_convert_datasubset(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "datasubset"
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     datasubset = czekitout.convert.to_numpy_array(**kwargs)
 
@@ -686,18 +662,14 @@ def save(datasubset, datasubset_id):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    func_alias(**kwargs)
+    _save(**kwargs)
 
     return None
 
 
 
 def _save(datasubset, datasubset_id):
-    current_func_name = inspect.stack()[0][3]
-
     kwargs = {"datasubset_id": datasubset_id, "datasubset": datasubset}
     multi_dim_slice_triplet = _calc_multi_dim_slice_triplet(**kwargs)
 
@@ -707,6 +679,8 @@ def _save(datasubset, datasubset_id):
 
     datasubset_id_core_attrs = datasubset_id.get_core_attrs(deep_copy=False)
     dataset_id = datasubset_id_core_attrs["dataset_id"]
+
+    current_func_name = "_save"
 
     kwargs = {"multi_dim_slice": multi_dim_slice_1,
               "task_requiring_transpose": current_func_name[1:]}

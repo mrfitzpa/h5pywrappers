@@ -21,14 +21,6 @@ r"""For loading and saving HDF5 object attributes.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
-# For randomly selecting items in dictionaries.
-import random
-
-
-
 # For validating and converting objects.
 import czekitout.check
 import czekitout.convert
@@ -56,11 +48,8 @@ __all__ = ["ID",
 
 
 def _check_and_convert_obj_id(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_obj_id
     obj_id = func_alias(params)
 
     return obj_id
@@ -68,16 +57,12 @@ def _check_and_convert_obj_id(params):
 
 
 def _pre_serialize_obj_id(obj_id):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
+    obj_to_pre_serialize = obj_id
 
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 15
-
-    param_name = current_func_name[char_idx:]
+    param_name = "obj_id"
 
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._pre_serialize_obj_id
     kwargs = {param_name: obj_to_pre_serialize}
     serializable_rep = func_alias(**kwargs)
     
@@ -86,12 +71,8 @@ def _pre_serialize_obj_id(obj_id):
 
 
 def _de_pre_serialize_obj_id(serializable_rep):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 18
-
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._de_pre_serialize_obj_id
     obj_id = func_alias(serializable_rep)
 
     return obj_id
@@ -99,9 +80,7 @@ def _de_pre_serialize_obj_id(serializable_rep):
 
 
 def _check_and_convert_attr_name(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "attr_name"
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     attr_name = czekitout.convert.to_str_from_str_like(**kwargs)
 
@@ -110,7 +89,7 @@ def _check_and_convert_attr_name(params):
 
 
 def _pre_serialize_attr_name(attr_name):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
+    obj_to_pre_serialize = attr_name
     serializable_rep = obj_to_pre_serialize
     
     return serializable_rep
@@ -229,9 +208,7 @@ class ID(fancytypes.PreSerializableAndUpdatable):
 
 
 def _check_and_convert_attr_id(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "attr_id"
     obj = params[obj_name]
     
     accepted_types = (ID,)
@@ -266,23 +243,21 @@ def load(attr_id):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    attr = func_alias(**kwargs)
+    attr = _load(**kwargs)
 
     return attr
 
 
 
 def _load(attr_id):
-    current_func_name = inspect.stack()[0][3]
-
     attr_id_core_attrs = attr_id.get_core_attrs(deep_copy=False)
     obj_id = attr_id_core_attrs["obj_id"]
     attr_name = attr_id_core_attrs["attr_name"]
     
     obj = h5pywrappers.obj.load(obj_id, read_only=True)
+
+    current_func_name = "_load"
 
     try:
         attr = obj.attrs[attr_name]
@@ -303,9 +278,7 @@ def _load(attr_id):
 
 
 def _check_and_convert_attr(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "attr"
     attr = params[obj_name]
 
     return attr
@@ -313,9 +286,7 @@ def _check_and_convert_attr(params):
 
 
 def _check_and_convert_write_mode(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "write_mode"
     obj = params[obj_name]
 
     func_alias = czekitout.check.if_one_of_any_accepted_strings
@@ -367,24 +338,22 @@ def save(attr, attr_id, write_mode=_default_write_mode):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    func_alias(**kwargs)
+    _save(**kwargs)
 
     return None
 
 
 
 def _save(attr_id, write_mode, attr):
-    current_func_name = inspect.stack()[0][3]
-
     attr_id_core_attrs = attr_id.get_core_attrs(deep_copy=False)
     obj_id = attr_id_core_attrs["obj_id"]
     attr_name = attr_id_core_attrs["attr_name"]
     
     h5pywrappers.obj._pre_save(obj_id)
     obj = h5pywrappers.obj.load(obj_id, read_only=False)
+
+    current_func_name = "_save"
 
     if (write_mode == "a-") and (attr_name in obj.attrs):
         obj.file.close()

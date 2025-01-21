@@ -21,12 +21,6 @@ r"""For identifying and loading HDF5 objects.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
-# For randomly selecting items in dictionaries.
-import random
-
 # For performing deep copies.
 import copy
 
@@ -63,9 +57,7 @@ __all__ = ["ID",
 
 
 def _check_and_convert_filename(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "filename"
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     filename = czekitout.convert.to_str_from_str_like(**kwargs)
 
@@ -74,7 +66,7 @@ def _check_and_convert_filename(params):
 
 
 def _pre_serialize_filename(filename):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
+    obj_to_pre_serialize = filename
     serializable_rep = obj_to_pre_serialize
     
     return serializable_rep
@@ -89,11 +81,11 @@ def _de_pre_serialize_filename(serializable_rep):
 
 
 def _check_and_convert_path_in_file(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "path_in_file"
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     path_in_file = czekitout.convert.to_str_from_str_like(**kwargs)
+
+    current_func_name = "_check_and_convert_path_in_file"
 
     if len(path_in_file) == 0:
         err_msg = globals()[current_func_name+"_err_msg_1"]
@@ -104,7 +96,7 @@ def _check_and_convert_path_in_file(params):
 
 
 def _pre_serialize_path_in_file(path_in_file):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
+    obj_to_pre_serialize = path_in_file
     serializable_rep = obj_to_pre_serialize
     
     return serializable_rep
@@ -225,9 +217,7 @@ def _check_and_convert_obj_id(params):
     name_of_obj_alias_of_obj_id = params.get("name_of_obj_alias_of_"+param_name,
                                              param_name)
 
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = param_name
     obj = copy.deepcopy(params[obj_name])
     
     accepted_types = (ID,)
@@ -243,7 +233,7 @@ def _check_and_convert_obj_id(params):
 
 
 def _pre_serialize_obj_id(obj_id):
-    obj_to_pre_serialize = random.choice(list(locals().values()))
+    obj_to_pre_serialize = obj_id
     serializable_rep = obj_to_pre_serialize.pre_serialize()
     
     return serializable_rep
@@ -260,9 +250,7 @@ def _de_pre_serialize_obj_id(serializable_rep):
 
 
 def _check_and_convert_read_only(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "read_only"
     kwargs = {"obj": params[obj_name], "obj_name": obj_name}
     read_only = czekitout.convert.to_bool(**kwargs)
 
@@ -305,10 +293,8 @@ def load(obj_id, read_only=_default_read_only):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    obj = func_alias(**kwargs)
+    obj = _load(**kwargs)
 
     return obj
 
@@ -333,13 +319,13 @@ def _load(obj_id, read_only):
 
 
 def _pre_load(obj_id, read_only):
-    current_func_name = inspect.stack()[0][3]
-
     obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
     filename = obj_id_core_attrs["filename"]
     path_in_file = obj_id_core_attrs["path_in_file"]
 
     file_mode = "r" if read_only else "a"
+
+    current_func_name = "_pre_load"
 
     try:
         if not pathlib.Path(filename).is_file():
@@ -370,13 +356,13 @@ def _pre_load(obj_id, read_only):
 
 
 def _pre_save(obj_id):
-    current_func_name = inspect.stack()[0][3]
-
     obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
     filename = obj_id_core_attrs["filename"]
     path_in_file = obj_id.core_attrs["path_in_file"]
 
     first_new_dir_made = _mk_parent_dir(filename)
+
+    current_func_name = "_pre_save"
 
     try:
         file_does_not_exist = (not pathlib.Path(filename).is_file())
@@ -420,7 +406,7 @@ def _pre_save(obj_id):
 
 
 def _mk_parent_dir(filename):
-    current_func_name = inspect.stack()[0][3]
+    current_func_name = "_mk_parent_dir"
 
     try:
         parent_dir_path = pathlib.Path(filename).resolve().parent
@@ -448,13 +434,13 @@ def _mk_parent_dir(filename):
 
 
 def _check_for_intermediary_datasets_along_path_in_file(obj_id):
-    current_func_name = inspect.stack()[0][3]
-
     obj_id_core_attrs = obj_id.get_core_attrs(deep_copy=False)
     filename = obj_id_core_attrs["filename"]
     path_in_file = obj_id.core_attrs["path_in_file"]
 
     file_is_not_new = pathlib.Path(filename).is_file()
+
+    current_func_name = "_check_for_intermediary_datasets_along_path_in_file"
 
     if file_is_not_new:
         with h5py.File(filename, "a") as file_obj:

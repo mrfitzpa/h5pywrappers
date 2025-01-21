@@ -21,9 +21,6 @@ r"""For loading and saving HDF5 groups.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
 # For checking whether a file exists at a given path.
 import pathlib
 
@@ -59,9 +56,7 @@ __all__ = ["load",
 
 
 def _check_and_convert_group_id(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "group_id"
     obj = params[obj_name]
     
     accepted_types = (h5pywrappers.obj.ID,)
@@ -77,11 +72,8 @@ def _check_and_convert_group_id(params):
 
 
 def _check_and_convert_read_only(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_read_only
     read_only = func_alias(params)
 
     return read_only
@@ -124,10 +116,8 @@ def load(group_id, read_only=_default_read_only):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    group = func_alias(**kwargs)
+    group = _load(**kwargs)
 
     return group
 
@@ -152,9 +142,7 @@ def _load(group_id, read_only):
 
 
 def _check_and_convert_group(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "group"
     obj = params[obj_name]
     
     accepted_types = (h5py._hl.group.Group, type(None))
@@ -170,11 +158,8 @@ def _check_and_convert_group(params):
 
 
 def _check_and_convert_write_mode(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.dataset
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_write_mode
     write_mode = func_alias(params)
 
     return write_mode
@@ -221,10 +206,8 @@ def save(group, group_id, write_mode=_default_write_mode):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    func_alias(**kwargs)
+    _save(**kwargs)
 
     return None
 
@@ -249,8 +232,6 @@ def _save(group, group_id, write_mode):
 
 
 def _pre_save(group, group_id, write_mode):
-    current_func_name = inspect.stack()[0][3]
-
     h5pywrappers.obj._pre_save(group_id)
 
     filename = group_id.core_attrs["filename"]
@@ -258,6 +239,8 @@ def _pre_save(group, group_id, write_mode):
     first_new_dir_made = h5pywrappers.obj._mk_parent_dir(filename)
 
     file_already_exists = pathlib.Path(filename).is_file()
+
+    current_func_name = "_pre_save"
 
     if write_mode in ("w", "w-"):
         if write_mode == "w-":

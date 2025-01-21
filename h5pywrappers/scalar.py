@@ -21,11 +21,6 @@ r"""For loading and saving HDF5 "scalars".
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
-
-
 # For loading and saving HDF5 datasets.
 import h5pywrappers.dataset
 
@@ -42,9 +37,7 @@ __all__ = ["load",
 
 
 def _check_and_convert_scalar_id(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "scalar_id"
 
     param_name_1 = "obj_id"
     param_name_2 = "name_of_obj_alias_of_"+param_name_1
@@ -53,8 +46,7 @@ def _check_and_convert_scalar_id(params):
     params[param_name_1] = params[params[param_name_2]]
 
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name[:char_idx]+param_name_1
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_obj_id
     scalar_id = func_alias(params)
 
     return scalar_id
@@ -84,20 +76,18 @@ def load(scalar_id):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    scalar = func_alias(**kwargs)
+    scalar = _load(**kwargs)
 
     return scalar
 
 
 
 def _load(scalar_id):
-    current_func_name = inspect.stack()[0][3]
-
     kwargs = {"dataset_id": scalar_id, "read_only": True}
     dataset = h5pywrappers.dataset.load(**kwargs)
+
+    current_func_name = "_load"
 
     if len(dataset.shape) != 0:
         dataset.file.close()
@@ -120,9 +110,7 @@ def _load(scalar_id):
 
 
 def _check_and_convert_scalar(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "scalar"
 
     param_name_1 = "dataset"
     param_name_2 = "name_of_obj_alias_of_"+param_name_1
@@ -130,10 +118,11 @@ def _check_and_convert_scalar(params):
     params[param_name_2] = obj_name
     params[param_name_1] = params[params[param_name_2]]
 
+    current_func_name = "_check_and_convert_scalar"
+
     try:
         module_alias = h5pywrappers.dataset
-        basename_of_func_alias = current_func_name[:char_idx]+param_name_1
-        func_alias = module_alias.__dict__[basename_of_func_alias]
+        func_alias = module_alias._check_and_convert_dataset
         scalar = func_alias(params)
 
         if len(scalar.shape) != 0:
@@ -149,11 +138,8 @@ def _check_and_convert_scalar(params):
 
 
 def _check_and_convert_write_mode(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.dataset
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_write_mode
     write_mode = func_alias(params)
 
     return write_mode
@@ -203,10 +189,8 @@ def save(scalar, scalar_id, write_mode=_default_write_mode):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    func_alias(**kwargs)
+    _save(**kwargs)
 
     return None
 

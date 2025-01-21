@@ -21,9 +21,6 @@ r"""For loading and saving JSON documents objects.
 ## Load libraries/packages/modules ##
 #####################################
 
-# For accessing attributes of functions.
-import inspect
-
 # For deserializing JSON documents.
 import json
 
@@ -53,9 +50,7 @@ __all__ = ["load",
 
 
 def _check_and_convert_json_document_id(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "json_document_id"
 
     param_name_1 = "obj_id"
     param_name_2 = "name_of_obj_alias_of_"+param_name_1
@@ -64,8 +59,7 @@ def _check_and_convert_json_document_id(params):
     params[param_name_1] = params[params[param_name_2]]
 
     module_alias = h5pywrappers.obj
-    basename_of_func_alias = current_func_name[:char_idx]+param_name_1
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_obj_id
     json_document_id = func_alias(params)
 
     return json_document_id
@@ -96,17 +90,15 @@ def load(json_document_id):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    json_document = func_alias(**kwargs)
+    json_document = _load(**kwargs)
 
     return json_document
 
 
 
 def _load(json_document_id):
-    current_func_name = inspect.stack()[0][3]
+    current_func_name = "_load"
 
     try:
         kwargs = {"dataset_id": json_document_id, "read_only": True}
@@ -125,9 +117,7 @@ def _load(json_document_id):
 
 
 def _check_and_convert_json_document(params):
-    current_func_name = inspect.stack()[0][3]
-    char_idx = 19
-    obj_name = current_func_name[char_idx:]
+    obj_name = "json_document"
     obj = params[obj_name]
 
     accepted_types = (dict, h5py._hl.dataset.Dataset)
@@ -143,11 +133,8 @@ def _check_and_convert_json_document(params):
 
 
 def _check_and_convert_write_mode(params):
-    current_func_name = inspect.stack()[0][3]
-    
     module_alias = h5pywrappers.dataset
-    basename_of_func_alias = current_func_name
-    func_alias = module_alias.__dict__[basename_of_func_alias]
+    func_alias = module_alias._check_and_convert_write_mode
     write_mode = func_alias(params)
 
     return write_mode
@@ -198,17 +185,15 @@ def save(json_document, json_document_id, write_mode=_default_write_mode):
         func_alias = globals()[func_name]
         params[param_name] = func_alias(params)
 
-    func_name = "_" + inspect.stack()[0][3]
-    func_alias = globals()[func_name]
     kwargs = params
-    func_alias(**kwargs)
+    _save(**kwargs)
 
     return None
 
 
 
 def _save(json_document, json_document_id, write_mode):
-    current_func_name = inspect.stack()[0][3]
+    current_func_name = "_save"
 
     try:
         if isinstance(json_document, dict):
